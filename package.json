@@ -23,8 +23,11 @@
     "semver": "^4.2.2",
     "through2": "^0.6.3"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "mkdirp": "^0.5.0",
+    "rimraf": "^2.2.8"
+  },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha --timeout=10000"
   }
 }
