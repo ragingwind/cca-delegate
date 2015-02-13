@@ -22,46 +22,46 @@ describe('ccad', function () {
     process.chdir(cwd);
   })
 
-  it('cca should return its version', function (done) {
+  it('should return its version', function () {
     return ccad.version().then(function(res) {
       console.log('cca version is', res.version);
       assert(true);
     }).catch(function(res) {
-      assert(false, res.err.toString());
+      assert(false, res.err && res.err.toString());
     });
   });
 
-  it('Environments should be prepared', function (done) {
+  it('should be prepared', function () {
     return ccad.checkenv().then(function(res) {
       assert(true);
     }).catch(function(res) {
-      assert(false, res.err.toString());
+      assert(false, res.err && res.err.toString());
     });
   });
 
-  it('New project should be created', function (done) {
+  it('should be created a new project', function () {
     return ccad.create({
       directory: path.join(tmp, 'myApp'),
       name: 'com.company.myapp'
     }).then(function(res) {
       assert(true);
     }).catch(function(res) {
-      assert(false, res.err.toString());
+      assert(false, res.err && res.err.toString());
     });
   });
 
-  it('New project should be failed', function (done) {
+  it('should be failed to create a new project', function () {
     return ccad.create({
       directory: path.join(tmp, 'myApp'),
       name: 'com.company.myapp',
     }).then(function(res) {
-      assert(false, res.err.toString());
+      assert(false, res.err && res.err.toString());
     }).catch(function(res) {
       assert(true);
     });
   });
 
-  it('New project should be failed', function (done) {
+  it('should be failed to create another project', function () {
     return ccad.create({
       directory: path.join(tmp, 'myApp1'),
       name: 'com.do.1app'
@@ -72,18 +72,58 @@ describe('ccad', function () {
     });
   });
 
-  it('Platform should be added', function (done) {
-    var target = path.join(tmp, 'myApp2');
-    return ccad.create({
-      directory: target,
-      name: 'com.company.myap2',
-    }).then(function() {
-      process.chdir(target);
-      return ccad.addPlatform('android');
-    }).then(function(res) {
+  it('should be added a new platform', function () {
+    process.chdir(path.join(tmp, 'myApp'));
+
+    return ccad.addPlatform('android').then(function(res) {
       assert(true);
     }).catch(function(res) {
-      assert(false, res.err.toString());
+      assert(false, res.err && res.err.toString());
+    });
+  });
+
+  it('should returns platform list', function () {
+    process.chdir(path.join(tmp, 'myApp'));
+
+    return ccad.getPlatform().then(function(res) {
+      assert(res.platforms && res.platforms.length >= 0);
+      assert(res.platforms[0].indexOf('android') !== -1);
+    }).catch(function(res) {
+      console.log(res);
+      assert(false, res.err && res.err.toString());
+    });
+  });
+
+  it('should update the platform to newer', function () {
+    process.chdir(path.join(tmp, 'myApp'));
+
+    return ccad.updatePlatform('android').then(function(res) {
+      assert(res.newVersion);
+    }).catch(function(res) {
+      console.log(res);
+      assert(false, res.err && res.err.toString());
+    });
+  });
+
+  it('should return plug-ins', function () {
+    process.chdir(path.join(tmp, 'myApp'));
+
+    return ccad.getPlugins().then(function(res) {
+      assert(res.plugins);
+      assert(res.plugins.length >= 0);
+    }).catch(function(res) {
+      console.log(res);
+      assert(false, res.err && res.err.toString());
+    });
+  });
+
+  it('should remove the platform', function () {
+    process.chdir(path.join(tmp, 'myApp'));
+
+    return ccad.removePlatform('android').then(function(res) {
+      assert(true);
+    }).catch(function(res) {
+      assert(false, res.err && res.err.toString());
     });
   });
 });

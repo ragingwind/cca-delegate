@@ -28,6 +28,6 @@
     "rimraf": "^2.2.8"
   },
   "scripts": {
-    "test": "mocha --timeout=10000"
+    "test": "mocha --timeout=200000"
   }
 }
