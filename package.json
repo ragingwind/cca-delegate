@@ -14,7 +14,8 @@
   "keywords": [
     "ccad",
     "cca",
-    "Mobile Chrome Apps"
+    "Chrome Mobile Apps",
+    "Chrome Apps"
   ],
   "dependencies": {
     "exec-then": "^1.0.1",
