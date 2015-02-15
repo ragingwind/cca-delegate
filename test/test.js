@@ -7,7 +7,7 @@ var rimraf = require('rimraf');
 var path = require('path');
 var ccad = require('../');
 
-describe('ccad', function () {
+describe('cca delegate', function () {
   var tmp = path.join(__dirname, 'tmp');
   var cwd = process.cwd();
 
@@ -16,8 +16,8 @@ describe('ccad', function () {
       verbose: true
     });
 
-    // rimraf.sync(tmp);
-    // mkdirp(tmp);
+    rimraf.sync(tmp);
+    mkdirp(tmp);
   });
 
   beforeEach(function() {
