@@ -4,7 +4,7 @@
 
 ## WARNING
 
-It's still in experimental and cca doesn't supports a official way that we can use in code. This node module try to parse stdio messages from result of execution of cca. The execution result can be changed follow by changes of cca updating that mean is `ccad` has risk factors
+It's still in experimental and cca doesn't supports a official way that we can use in code. This node module try to parse stdio messages from result of execution of cca. The execution result can be changed follow by changes of cca updating that mean is `ccad` can be has risk factors
 
 ## Install
 
