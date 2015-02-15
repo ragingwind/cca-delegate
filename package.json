@@ -1,18 +1,18 @@
 {
-  "name": "ccad",
+  "name": "cca-delegate",
   "version": "0.0.3",
-  "description": "ccad delegate",
+  "description": "node module for cca (Chrome Mobile Apps) delegate to use programmatically on gulp/Grunt plug-ins and node modules",
   "author": {
     "name": "ragingwind",
     "email": "ragingwind@gmail.com"
   },
-  "repository": "ragingwind/ccad",
+  "repository": "ragingwind/cca-delegate",
   "license": "MIT",
   "files": [
     "index.js"
   ],
   "keywords": [
-    "ccad",
+    "cca-delegate",
     "cca",
     "Chrome Mobile Apps",
     "Chrome Apps"
