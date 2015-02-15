@@ -16,8 +16,8 @@ describe('ccad', function () {
       verbose: true
     });
 
-    rimraf.sync(tmp);
-    mkdirp(tmp);
+    // rimraf.sync(tmp);
+    // mkdirp(tmp);
   });
 
   beforeEach(function() {
@@ -134,8 +134,39 @@ describe('ccad', function () {
   it('should removed the platform', function () {
     process.chdir(path.join(tmp, 'myApp'));
 
-    return ccad.removePlatform('android').then(function(res) {
+    return ccad.removePlatform('ios').then(function(res) {
       assert(res.params.removed);
+    }).catch(catcher);
+  });
+
+  it('should run it on emulator', function () {
+    process.chdir(path.join(tmp, 'myApp'));
+
+    return ccad.run({
+      platform: 'android',
+      emulate: true
+    }).then(function(res) {
+      assert(res.params.running);
+    }).catch(catcher);
+  });
+
+  it('should run it on chrome', function () {
+    process.chdir(path.join(tmp, 'myApp'));
+
+    return ccad.run({
+      platform: 'chrome'
+    }).then(function(res) {
+      assert(res.params.running);
+    }).catch(catcher);
+  });
+
+  it('should push it to target', function () {
+    process.chdir(path.join(tmp, 'myApp'));
+
+    return ccad.push({
+      target: '192.168.0.30'
+    }).then(function(res) {
+      assert(res.params.pushed);
     }).catch(catcher);
   });
 });

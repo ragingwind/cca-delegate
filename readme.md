@@ -1,7 +1,10 @@
 #  [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-url]][daviddm-image]
 
-> cca delegate
+> node module for cca (Chrome Mobile Apps) delegate to use programmatically on gulp/Grunt plug-ins and node modules
 
+## WARNING
+
+It's still in experimental and cca doesn't supports a official way that we can use in code. This node module try to parse stdio messages from result of execution of cca. The execution result can be changed follow by changes of cca updating that mean is `ccad` has risk factors
 
 ## Install
 
@@ -10,20 +13,32 @@ $ npm install --save ccad
 ```
 
 
-## Usage
+## Methods
+
+`ccad` exported method matches with `cca` commands. You can find mode information from [cca](https://www.npmjs.com/package/cca) and test in this repository.
+
+- options: Execution options. see [exec-then](http://goo.gl/lEn3L8) for more info.
+- version: `cca --v`
+- checkenv: `cca checkenv`,
+- create: `cca MyApp com.company.my-app`
+- addPlatform: `cca platform add android`
+- removePlatform: `cca platform rm android`
+- getPlatform: `cca platform ls`
+- updatePlatform: `cca platform update android`
+- getPlugins: `cca plugin ls`
+- searchPlugins: `cca plugin search <keyword>`
+- build: `cca build android`
+- run: `cca run --debug --watch android` or `cca emulate --debug android`
+- push: `cca push --target=192.168.0.30`
+
 
 ```js
 var ccad = require('ccad');
 
-ccad('Rainbow');
+ccad.version().then(function(res) {
+  var version = res.params.version;
+});
 ```
-
-```sh
-$ npm install --global ccad
-$ ccad --help
-```
-
-
 
 ## License
 

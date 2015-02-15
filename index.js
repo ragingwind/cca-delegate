@@ -245,6 +245,74 @@ function build(platforms, opt) {
   });
 }
 
+function run(opt) {
+  if (!$.isSupportedPlatform(opt.platform)) {
+    throw new Error('Invalid platforms');
+  }
+
+  // %WARN% ios running is not tested fully so
+  // run method doesn't supports ios platform now
+  if (!opt.platform === 'ios') {
+    throw new Error('does not supports ios now');
+  }
+
+  var bin = ['cca'];
+
+  opt.emulate ? bin.push('emulate') : bin.push('run');
+  bin.push(opt.platform);
+  opt.release ? bin.push('--release') : bin.push('--debug');
+  opt = opt ? _.merge(execOptions, opt) : {};
+
+  return exec(bin, opt, function(std) {
+    var ret = {
+      running: true
+    };
+    var runMessage = {
+      'android': [
+        'BUILD SUCCESSFUL',
+        'LAUNCH SUCCESS'
+      ]
+    };
+
+    _.forEach(runMessage[opt.platform], function(m) {
+      if (!$.includes(std.stdout, m)) {
+        return ret.running = false;
+      }
+    });
+
+    return ret;
+  });
+}
+
+function push(opt) {
+  // %WARN% using usb, which has a lot of issue out of box
+  // So it doesn't supports until now
+  if (!opt.target) {
+    throw new Error('does not supports push via usb now');
+  }
+
+  var bin = ['cca', 'push'];
+
+  if (opt.target && opt.port) {
+    opt.target += ':' + opt.port;
+  }
+
+  opt.target && bin.push('--target=' + opt.target);
+  // watch mode makes child process running like daemon
+  // that mean is child process will not return back immediately
+  // so that, we can't get stdio result until child process
+  // has been running
+  opt.watch && bin.push('--watch');
+  opt = opt ? _.merge(execOptions, opt) : {};
+
+  return exec(bin, opt, function(std) {
+    return {
+      pushed: !std.stderr || std.stderr.length === 0
+    }
+  });
+}
+
+
 module.exports = {
   options: setOptions,
   version: getVersion,
@@ -256,5 +324,7 @@ module.exports = {
   updatePlatform: updatePlatform,
   getPlugins: getPlugins,
   searchPlugins: searchPlugins,
-  build: build
+  build: build,
+  run: run,
+  push: push
 };
