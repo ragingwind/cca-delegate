@@ -2,235 +2,259 @@
 
 var spawn = require('child_process').spawn;
 var q = require('q');
-var nodeExec = require('exec');
-var semver = require('semver');
+var _ = require('lodash');
+var $ = require('./gadget');
+var exec = require('exec-then');
 
-var errorMessages = {
-  'checkenv': [
-    'properly'
-  ],
-  'create': [
-    'Path already exists',
-    'App id contains a reserved word'
-  ],
-  'platform': [
-    'is not a Cordova-based project'
-  ]
+var execOptions = {
+  verbose: false
 };
 
-function hasError(cmd, stderr) {
-  if (!stderr) return false;
+function setOptions(opt) {
+  execOptions = _.merge(execOptions, opt);
+}
 
-  var errs = errorMessages[cmd];
+function getVersion() {
+  return exec('cca --v', execOptions, function(std, de) {
+    var ret = {
+      version: $.getValidSemVer(std.stdout)
+    };
 
-  for (var i = 0; i < errs.length; ++i) {
-    if (stderr.indexOf(errs[i]) !== -1) {
-      return true;
+    if (!ret.version) {
+      ret.err = new Error('cca is not ready');
     }
-  }
 
-  return false;
-};
-
-function exec (bin, opt, cb) {
-  if (typeof opt === 'function') {
-    cb = opt;
-    opt = {};
-  }
-
-  nodeExec(bin, opt, function(err, out, code) {
-    cb({
-      stderr: err, stdout: out, exitcode: code
-    });
+    return ret;
   });
-};
-
-function isPackageName(name) {
-  return /^([a-zA-Z]{2,10})\.([a-zA-Z]{1,6}|[a-zA-Z0-9-]{1,30})\.[a-zA-Z0-9-_]{0,61}/gi.test(name);
 }
 
-function isSupportedPlatform(platform) {
-  return /^android$/i.test(platform) || /^ios$/i.test(platform);
+function checkenv() {
+  return exec(['cca', 'checkenv'], execOptions, function(std, de) {
+    var res = null;
+    var rx = /(Android|iOS)(.*?)*/gi;
+    var ret = {
+      checkenv: true
+    };
+
+    while ((res = rx.exec(std.stderr)) !== null) {
+      if (!$.includes(res[0], 'properly')) {
+        ret.checkenv = false;
+        ret.err = new Error('Platforms are not properly');
+        break;
+      }
+    }
+
+    return ret;
+  });
 }
 
-var ccad = {
-  version: function() {
-    var deferer = q.defer();
+function createProject(opt) {
+  if (!opt || !opt.directory || !opt.name) {
+    throw new Error('Missing arguments to create a project');
+  }
 
-    exec(['cca', '--v'], function(std) {
-      std.version = semver.valid(std.stdout.trim());
-      if (!std.version) {
-        std.err = new Error('cca is not installed');
+  if (!$.isPackageName(opt.name)) {
+    throw new Error('Invalid package name');
+  }
+
+  if ($.isSupportedPlatform(opt.platform)) {
+    throw new Error('It is invalid platform ' + opt.platform)
+  }
+
+  var bin = ['cca', 'create', opt.directory, opt.name];
+
+  opt.platform && bin.push('--' + opt.platform);
+  opt.copyFrom && bin.push('--copy-from' + opt.copyFrom);
+  opt.linkTo && bin.push('--link-to' + opt.linkTo);
+
+  return exec(bin, execOptions, function(std, de) {
+    var ret = {
+      created: true
+    };
+    var errs = [
+      'Path already exists',
+      'App id contains a reserved word'
+    ];
+
+    _.forEach(errs, function(e) {
+      if ($.includes(std.stderr, e)) {
+        ret.created = false;
+        ret.err = new Error('Failed to create a new Project, Reason: ' + std.stderr);
+        return false;
       }
-
-      deferer[!std.err ? 'resolve' : 'reject'](std);
     });
 
-    return deferer.promise;
-  },
-	checkenv: function() {
-    var deferer = q.defer();
+    return ret;
+  });
+}
 
-    exec(['cca', 'checkenv'], function(std) {
-      var res = null;
-      var rx = /(Android|iOS)(.*?)*/gi;
+function doPlatform(subcmd, platform, proc) {
+  if (typeof platform === 'function') {
+    proc = platform;
+    platform = '';
+  } else {
+    if (!$.isSupportedPlatform(platform)) {
+      throw new Error(platform + ' is not supported platform');
+    }
+  }
 
-      while ((res = rx.exec(std.stderr)) !== null) {
-        if (!/properly/i.test(res[0])) {
-          std.err = new Error('Platforms are not properly');
-          break;
-        }
-      }
+  return exec(['cca', 'platform', subcmd, platform], execOptions, function(std) {
+    return proc(std);
+  });
+}
 
-      deferer[!std.err ? 'resolve' : 'reject'](std);
-    });
+function addPlatform(platform) {
+  return doPlatform('add', platform, function(std) {
+    var ret = {
+      added: true
+    };
 
-    return deferer.promise;
-	},
-  create: function(opt) {
-    var deferer = q.defer();
-    var args = ['cca', 'create'];
-
-    if (!opt || !opt.directory || !opt.name) {
-      throw new Error('Missing arguments to create a project');
+    if ($.includes(std.stderr, 'is not a Cordova-based project')) {
+      ret.added = false;
+      ret.err = new Error('Failed to add a new Platform');
     }
 
-    if (!isPackageName(opt.name)) {
-      throw new Error('Invalid package name');
+    return ret;
+  });
+}
+
+function removePlatform(platform) {
+  return doPlatform('rm', platform, function(std) {
+    var ret = {
+      removed: true
+    };
+
+    if (std.stderr) {
+      ret.added = false;
+      ret.err = new Error('Failed to remove the Platform');
     }
 
-    if (opt.platform && isSupportedPlatform(opt.platform)) {
-      throw new Error('It is invalid platform ' + opt.platform)
+    return ret;
+  });
+}
+
+function getPlatform() {
+  return doPlatform('ls', function(std) {
+    var ret = {};
+
+    var res = /(Installed platforms:\W)(.*)/gi.exec(std.stdout);
+    if (res && res[2]) {
+      ret.platforms = res[2].split(', ');
     }
 
-    args.push(opt.directory);
-    args.push(opt.name);
-    opt.platform && args.push('--' + opt.platform);
-    opt.copyFrom && args.push('--copy-from' + opt.copyFrom);
-    opt.linkTo && args.push('--link-to' + opt.linkTo);
+    return ret;
+  });
+}
 
-    exec(args, function(std) {
-      if (hasError('create', std.stderr, 0)) {
-        std.err = new Error('Failed to create a new Project, Reason: ' + std.stderr);
-      }
 
-      deferer[!std.err ? 'resolve' : 'reject'](std);
-    });
+function updatePlatform(platform) {
+  return doPlatform('update', platform, function(std) {
+    var ret = {};
 
-    return deferer.promise;
-  },
-  addPlatform: function(platform) {
-    var deferer = q.defer();
-    var args = ['cca', 'platform', 'add', platform];
-
-    if (!isSupportedPlatform(platform)) {
-      throw new Error(platform + ' is a invalid platform');
+    var res = /(Android project is now at version\W)(.*)/gi.exec(std.stdout);
+    if (res && res[2]) {
+      ret.newVersion = res[2];
     }
 
-    exec(args, function(std) {
-      if (hasError('platform', std.stderr)) {
-        std.err = new Error('Failed to add a new Platform');
-      }
+    return ret;
+  });
+}
 
-      deferer[!std.err ? 'resolve' : 'reject'](std);
-    });
+function getPlugins() {
+  return exec(['cca', 'plugin', 'ls'], execOptions, function(std) {
+    var ret = {};
 
-    return deferer.promise;
-  },
-  removePlatform: function(platform) {
-    var deferer = q.defer();
-    var args = ['cca', 'platform', 'rm', platform];
-
-    if (!isSupportedPlatform(platform)) {
-      throw new Error(platform + ' is a invalid platform');
-    }
-
-    exec(args, function(std) {
-      if (std.stderr) {
-        std.err = new Error('Failed to remove Platform');
-      }
-
-      deferer[!std.err ? 'resolve' : 'reject'](std);
-    });
-
-    return deferer.promise;
-  },
-  getPlatform: function() {
-    var deferer = q.defer();
-    var args = ['cca', 'platform', 'ls'];
-
-    exec(args, function(std) {
-      if (std.stderr) {
-        std.err = new Error('Failed to get platform list');
-      }
-
-      var res = /(Installed platforms:\W)(.*)/gi.exec(std.stdout);
-      if (res && res[2]) {
-        std.platforms = res[2].split(', ');
-      }
-
-      deferer[!std.err ? 'resolve' : 'reject'](std);
-    });
-
-    return deferer.promise;
-  },
-  updatePlatform: function(platform) {
-    var deferer = q.defer();
-    var args = ['cca', 'platform', 'update', platform];
-
-    if (!isSupportedPlatform(platform)) {
-      throw new Error(platform + ' is a invalid platform');
-    }
-
-    exec(args, function(std) {
-      if (std.stderr) {
-        std.err = new Error('Failed to update platform');
-      }
-
-      var res = /(Android project is now at version\W)(.*)/gi.exec(std.stdout);
-      if (res && res[2]) {
-        std.newVersion = res[2];
-      }
-
-      deferer[!std.err ? 'resolve' : 'reject'](std);
-    });
-
-    return deferer.promise;
-  },
-  getPlugins: function() {
-    var deferer = q.defer();
-    var args = ['cca', 'plugin', 'ls'];
-
-    exec(args, function(std) {
-      if (std.stderr) {
-        std.err = new Error('Failed to get plug-ins');
-      }
-
+    if (!std.stderr) {
       var res = std.stdout.trim().split('\n');
 
       // Should be more than 1
       if (res.length > 1) {
-        std.plugins = [];
+        ret.plugins = [];
       }
 
       for (var i = 1; i < res.length; ++i) {
         var p = res[i].split(' ');
-        std.plugins.push({
+        ret.plugins.push({
           id: p[0],
           version: p[1],
           name: /(\"(.*?)\"$)/i.exec(res[i])[0]
         });
       }
+    }
 
-      deferer[!std.err ? 'resolve' : 'reject'](std);
-    });
-
-    return deferer.promise;
-  },
-  searchPlugins: function() {},
-  build: function() {},
-  run: function() {},
-  push: function() {}
+    return ret;
+  });
 }
 
-module.exports = ccad;
+function searchPlugins(keyword) {
+  return exec(['cca', 'plugin', 'search', keyword], execOptions, function(std) {
+    var ret = {};
+
+    if (!std.stderr) {
+      var res = std.stdout.trim().split('\n');
+
+      // Should be more than 1
+      if (res.length > 1) {
+        ret.plugins = [];
+      }
+
+      for (var i = 1; i < res.length; ++i) {
+        var p = res[i].split(' - ');
+        ret.plugins.push({
+          id: p[0],
+          desc: p[1]
+        });
+      }
+    };
+
+    return ret;
+  });
+}
+
+function build(platforms, opt) {
+  if (!_.isArray(platforms)) {
+    platforms = new Array(platforms);
+  }
+
+  if (!$.isSupportedPlatform(platforms)) {
+    throw new Error('Invalid platforms');
+  }
+
+  opt = opt ? _.merge(execOptions, opt) : {};
+
+  return exec(['cca', 'build'].concat(platforms), opt, function(std) {
+    var ret = {
+      build: true
+    };
+
+    var buildMessage = {
+      'android': 'BUILD SUCCESSFUL',
+      'ios': 'BUILD SUCCEEDED'
+    };
+
+    _.forEach(platforms, function(p) {
+      if (buildMessage[p]) {
+        if (!$.includes(std.stdout, buildMessage[p])) {
+          ret.build = false;
+          return false;
+        }
+      }
+    });
+
+    return ret;
+  });
+}
+
+module.exports = {
+  options: setOptions,
+  version: getVersion,
+  checkenv: checkenv,
+  create: createProject,
+  addPlatform: addPlatform,
+  removePlatform: removePlatform,
+  getPlatform: getPlatform,
+  updatePlatform: updatePlatform,
+  getPlugins: getPlugins,
+  searchPlugins: searchPlugins,
+  build: build
+};

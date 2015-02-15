@@ -1,0 +1,156 @@
+
+  cca v0.5.1
+## Creating Your Application
+## Running Cordova Command: create /Users/ragingwind/Workspace/ragingwind/ccad/test/tmp/doApp com.do.app 
+[31mApp id contains a reserved word, or is not a valid identifier.[39m
+[93m․[0mcca v0.5.1
+## Creating Your Application
+## Running Cordova Command: create /Users/ragingwind/Workspace/ragingwind/ccad/test/tmp/myApp com.company.myapp 
+## Creating default config.xml
+Done!
+
+Your project has been created, with web assets in the `www` directory:
+/Users/ragingwind/Workspace/ragingwind/ccad/test/tmp/myApp/www
+
+Remember to run `cca prepare` after making changes if you are using an IDE.
+Full instructions: https://github.com/MobileChromeApps/mobile-chrome-apps/blob/master/docs/Develop.md#making-changes-to-your-app-source-code
+[93m․[0mcca v0.5.1
+Running command: /Users/ragingwind/Workspace/ragingwind/ccad/test/tmp/myApp/hooks/before_platform_add/cca-check.js /Users/ragingwind/Workspace/ragingwind/ccad/test/tmp/myApp
+Creating android project...
+Creating Cordova project for the Android platform:
+	Path: platforms/android
+	Package: com.company.myapp
+	Name: myApp
+	Android target: android-19
+Copying template files...
+Project successfully created.
+## Updating plugins based on manifest.json
+## Running Cordova Command: plugin add org.apache.cordova.engine.crosswalk
+Installing "org.apache.cordova.engine.crosswalk" for android
+## Running Cordova Command: plugin add org.apache.cordova.file
+Fetching plugin "org.apache.cordova.file" via plugin registry
+Installing "org.apache.cordova.file" for android
+## Running Cordova Command: plugin add org.apache.cordova.inappbrowser
+Fetching plugin "org.apache.cordova.inappbrowser" via plugin registry
+Installing "org.apache.cordova.inappbrowser" for android
+## Running Cordova Command: plugin add org.apache.cordova.network-information
+Fetching plugin "org.apache.cordova.network-information" via plugin registry
+Installing "org.apache.cordova.network-information" for android
+## Running Cordova Command: plugin add org.apache.cordova.statusbar
+Fetching plugin "org.apache.cordova.statusbar" via plugin registry
+Installing "org.apache.cordova.statusbar" for android
+## Running Cordova Command: plugin add org.chromium.bootstrap
+Fetching plugin "org.chromium.bootstrap" via plugin registry
+Installing "org.chromium.bootstrap" for android
+Fetching plugin "org.chromium.common" via plugin registry
+Installing "org.chromium.common" for android
+Fetching plugin "org.chromium.runtime" via plugin registry
+Installing "org.chromium.runtime" for android
+Fetching plugin "org.chromium.storage" via plugin registry
+Installing "org.chromium.storage" for android
+## Running Cordova Command: plugin add org.chromium.common
+Fetching plugin "org.chromium.common" via plugin registry
+Plugin "org.chromium.common" already installed on android.
+## Running Cordova Command: plugin add org.chromium.i18n
+Fetching plugin "org.chromium.i18n" via plugin registry
+Installing "org.chromium.i18n" for android
+## Running Cordova Command: plugin add org.chromium.navigation
+Fetching plugin "org.chromium.navigation" via plugin registry
+Installing "org.chromium.navigation" for android
+## Running Cordova Command: plugin add org.chromium.polyfill.blob_constructor
+Fetching plugin "org.chromium.polyfill.blob_constructor" via plugin registry
+Installing "org.chromium.polyfill.blob_constructor" for android
+## Running Cordova Command: plugin add org.chromium.polyfill.customevent
+Fetching plugin "org.chromium.polyfill.customevent" via plugin registry
+Installing "org.chromium.polyfill.customevent" for android
+## Running Cordova Command: plugin add org.chromium.polyfill.xhr_features
+Fetching plugin "org.chromium.polyfill.xhr_features" via plugin registry
+Installing "org.chromium.polyfill.xhr_features" for android
+## Running Cordova Command: plugin add org.chromium.runtime
+Fetching plugin "org.chromium.runtime" via plugin registry
+Plugin "org.chromium.runtime" already installed on android.
+## Running Cordova Command: plugin add org.chromium.storage
+Fetching plugin "org.chromium.storage" via plugin registry
+Plugin "org.chromium.storage" already installed on android.
+Running command: /Users/ragingwind/Workspace/ragingwind/ccad/test/tmp/myApp/hooks/before_prepare/cca-check.js /Users/ragingwind/Workspace/ragingwind/ccad/test/tmp/myApp
+Plugin "org.apache.cordova.engine.crosswalk" already installed on android.
+Plugin "org.apache.cordova.file" already installed on android.
+Plugin "org.apache.cordova.inappbrowser" already installed on android.
+Plugin "org.apache.cordova.network-information" already installed on android.
+Plugin "org.apache.cordova.statusbar" already installed on android.
+Plugin "org.chromium.bootstrap" already installed on android.
+Plugin "org.chromium.common" already installed on android.
+Plugin "org.chromium.i18n" already installed on android.
+Plugin "org.chromium.navigation" already installed on android.
+Plugin "org.chromium.polyfill.blob_constructor" already installed on android.
+Plugin "org.chromium.polyfill.customevent" already installed on android.
+Plugin "org.chromium.polyfill.xhr_features" already installed on android.
+Plugin "org.chromium.runtime" already installed on android.
+Plugin "org.chromium.storage" already installed on android.
+[93m․[0mcca v0.5.1
+Installed platforms: android 4.0.0-dev
+Available platforms: amazon-fireos, blackberry10, browser, firefoxos, ios
+[93m․[0mcca v0.5.1
+Android project is now at version 4.0.0-dev
+If you updated from a pre-3.2.0 version and use an IDE, we now require that you import the "CordovaLib" library project.
+[93m․[0mcca v0.5.1
+org.apache.cordova.engine.crosswalk 0.0.1-dev "Crosswalk Engine"
+org.apache.cordova.file 1.3.3 "File"
+org.apache.cordova.inappbrowser 0.6.0 "InAppBrowser"
+org.apache.cordova.network-information 0.2.15 "Network Information"
+org.apache.cordova.statusbar 0.1.10 "StatusBar"
+org.chromium.bootstrap 1.1.3 "Chrome Apps Core"
+org.chromium.common 1.0.5 "Chrome Apps Common Utils"
+org.chromium.i18n 1.0.3 "Chrome Apps I18n API"
+org.chromium.navigation 1.0.2 "Chrome Apps Navigation"
+org.chromium.polyfill.blob_constructor 1.0.1 "Blob constructor shim"
+org.chromium.polyfill.customevent 1.0.3 "CustomEvent constuctor shim"
+org.chromium.polyfill.xhr_features 1.0.2 "XHR Blob Response Type Polyfill"
+org.chromium.runtime 1.0.4 "Chrome App Runtime"
+org.chromium.storage 1.0.3 "Chrome Apps Storage API"
+[93m․[0mcca v0.5.1
+org.chromium.alarms - This plugin allows apps to register alarms.
+org.chromium.audiocapture - This plugin provides permissions to capture audio directly from the user's Microphone via the getUserMedia API.
+org.chromium.bluetooth - This plugin implements the [chrome.bluetooth](https://developer.chrome.com/apps/bluetooth) API for iOS and Android.
+org.chromium.bluetoothlowenergy - This plugin implements the [chrome.bluetoothLowEnergy](https://developer.chrome.com/apps/bluetoothLowEnergy) API for iOS and Android.
+org.chromium.bluetoothsocket - This plugin implements the [chrome.bluetoothSocket](https://developer.chrome.com/apps/bluetoothSocket) API for iOS and Android.
+org.chromium.bootstrap - This plugin contains the code used to wrap a Chrome app and make it run using Cordova. It is meant to be used with the `cca` tool, and isn't useful outside the context of a mobile Chrome App.
+org.chromium.common - This plugin is a dependency for a few other chromium plugins.
+org.chromium.filechooser - Provides an Android file chooser.
+org.chromium.filesystem - This plugin allows apps to access a device's file system.
+org.chromium.frameworks.googleopensource - This plugin adds the Google Open Source iOS framework to a project.
+org.chromium.frameworks.googleplus - This Cordova plugin adds the Google Plus iOS framework to a project.
+org.chromium.gcm - This plugin allows Android apps to send/receive push messages.
+org.chromium.i18n - This plugin allows apps to present localised content to users according to the language / locale settings on their device.
+org.chromium.identity - This plugin provides OAuth2 authentication for Android and iOS.
+org.chromium.idle - This plugin provides the ability to listen and check for the idle status of a device.
+org.chromium.iossocketscommon - This plugin provides common services for chrome.socket and chrome.sockets APIs on iOS.
+org.chromium.navigation - This plugin contains the code used to intercept navigation within a Chrome app, and open links in the system browser instead.
+org.chromium.notifications - This plugin allows apps to show notifications in the status bar.
+org.chromium.polyfill.blob_constructor - A Cordova plugin which provides Blob() constructor syntax for versions of Android which do not support it.
+org.chromium.polyfill.customevent - customEvent ===========
+org.chromium.polyfill.xhr_features - A Cordova plugin which provides Blob return type support for XMLHttpRequest in iOS (pre iOS7) and Android (pre-KitKat)
+org.chromium.power - This plugin provides the ability to override the device's default power management.
+org.chromium.pushmessaging - This plugin allows apps to receive push messages.
+org.chromium.runtime - Implements the `chrome.runtime` and `chrome.app.runtime` namespaces.
+org.chromium.socket - This plugin provides client and server sockets for Android and iOS.
+org.chromium.sockets.tcp - This plugin provides TCP client sockets for Android and iOS.
+org.chromium.sockets.tcpserver - This plugin provides TCP server sockets for Android and iOS.
+org.chromium.sockets.udp - This plugin provides UDP sockets for Android and iOS.
+org.chromium.storage - This plugin provides allows apps to use local storage.
+org.chromium.syncfilesystem - This plugin allows apps to access a file system that syncs to Google Drive.
+org.chromium.system.cpu - This plugin provides the ability to query basic CPU information of the system.
+org.chromium.system.display - This plugin provides the ability to query display metadata.
+org.chromium.system.memory - This plugin provides the ability to get physical memory information.
+org.chromium.system.network - This plugin provides the ability to retrieve information about local network adapters.
+org.chromium.system.storage - This plugin provides the ability to query storage device information and be notified when a removable storage device is attached and detached.
+org.chromium.videocapture - This plugin provides permissions to capture video directly from the user's Web Cam via the getUserMedia API.
+org.chromium.xiaolong - no description provided
+org.chromium.zip - Unzips zip files
+[93m․[0m[ '\u001b[31mThe provided path "/Users/ragingwind/Workspace/ragingwind/ccad/test/tmp/myApp/platforms/ios" is not a Cordova iOS project.\u001b[39m' ]
+cca v0.5.1
+[31mThe provided path "/Users/ragingwind/Workspace/ragingwind/ccad/test/tmp/myApp/platforms/ios" is not a Cordova iOS project.[39m
+[31m․[0m
+
+[92m [0m[32m 7 passing[0m[90m (8s)[0m
+
