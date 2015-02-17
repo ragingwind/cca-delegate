@@ -9,7 +9,8 @@
   "repository": "ragingwind/cca-delegate",
   "license": "MIT",
   "files": [
-    "index.js"
+    "index.js",
+    "gadget.js"
   ],
   "keywords": [
     "cca-delegate",
