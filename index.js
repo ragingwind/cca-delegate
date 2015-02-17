@@ -57,7 +57,7 @@ function createProject(opt) {
     throw new Error('Invalid package name');
   }
 
-  if ($.isSupportedPlatform(opt.platform)) {
+  if (opt.platform && $.isSupportedPlatform(opt.platform)) {
     throw new Error('It is invalid platform ' + opt.platform)
   }
 
