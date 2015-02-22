@@ -212,17 +212,23 @@ function searchPlugins(keyword) {
 }
 
 function build(platforms, opt) {
-  if (!_.isArray(platforms)) {
-    platforms = new Array(platforms);
-  }
+  var bin = ['cca', 'build'];
 
-  if (!$.isSupportedPlatform(platforms)) {
-    throw new Error('Invalid platforms');
+  if (platforms) {
+    if (!_.isArray(platforms)) {
+      platforms = new Array(platforms);
+    }
+
+    if (!$.isSupportedPlatform(platforms)) {
+      throw new Error('Invalid platforms');
+    }
+
+    bin = bin.concat(platforms);
   }
 
   opt = opt ? _.merge(execOptions, opt) : {};
 
-  return exec(['cca', 'build'].concat(platforms), opt, function(std) {
+  return exec(bin, opt, function(std) {
     var ret = {
       build: true
     };
