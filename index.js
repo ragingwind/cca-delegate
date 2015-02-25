@@ -57,15 +57,15 @@ function createProject(opt) {
     throw new Error('Invalid package name');
   }
 
-  if (opt.platform && $.isSupportedPlatform(opt.platform)) {
+  if (opt.platform && !$.isSupportedPlatform(opt.platform)) {
     throw new Error('It is invalid platform ' + opt.platform)
   }
 
   var bin = ['cca', 'create', opt.directory, opt.name];
 
   opt.platform && bin.push('--' + opt.platform);
-  opt.copyFrom && bin.push('--copy-from' + opt.copyFrom);
-  opt.linkTo && bin.push('--link-to' + opt.linkTo);
+  opt.copyFrom && bin.push('--copy-from=' + opt.copyFrom);
+  opt.linkTo && bin.push('--link-to=' + opt.linkTo);
 
   return exec(bin, execOptions, function(std, de) {
     var ret = {
