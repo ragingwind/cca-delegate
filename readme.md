@@ -29,6 +29,7 @@ $ npm install --save cca-delegate
 - searchPlugins: `cca plugin search <keyword>`
 - build: `cca build android`
 - run: `cca run --debug --watch android` or `cca emulate --debug android`
+  + linkto: `String`, You can change www link of cordova project that created with --link-to option
 - push: `cca push --target=192.168.0.30`
 
 
