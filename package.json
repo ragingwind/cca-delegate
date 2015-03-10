@@ -19,6 +19,7 @@
     "Chrome Apps"
   ],
   "dependencies": {
+    "cordova-linkto": "0.0.2",
     "exec-then": "^1.0.1",
     "lodash": "^3.2.0",
     "q": "^1.1.2",

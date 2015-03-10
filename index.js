@@ -5,6 +5,7 @@ var q = require('q');
 var _ = require('lodash');
 var $ = require('./gadget');
 var exec = require('exec-then');
+var linkto = require('cordova-linkto');
 
 var execOptions = {
   verbose: false
@@ -269,25 +270,42 @@ function run(opt) {
   opt.release ? bin.push('--release') : bin.push('--debug');
   opt = opt ? _.merge(execOptions, opt) : {};
 
-  return exec(bin, opt, function(std) {
-    var ret = {
-      running: true
-    };
-    var runMessage = {
-      'android': [
-        'BUILD SUCCESSFUL',
-        'LAUNCH SUCCESS'
-      ]
-    };
+  var deferred = q.defer();
 
-    _.forEach(runMessage[opt.platform], function(m) {
-      if (!$.includes(std.stdout, m)) {
-        return ret.running = false;
+  if (opt.linkto) {
+    linkto(opt.linkto, opt.cwd || process.cwd(), function(err) {
+      if (err) {
+        return deferred.reject();
       }
-    });
 
-    return ret;
-  });
+      exec(bin, opt, function(std) {
+        var ret = {
+          running: true
+        };
+        var runMessage = {
+          'android': [
+            'BUILD SUCCESSFUL',
+            'LAUNCH SUCCESS'
+          ]
+        };
+
+        _.forEach(runMessage[opt.platform], function(m) {
+          if (!$.includes(std.stdout, m)) {
+            return ret.running = false;
+          }
+        });
+
+        return ret;
+      }).then(function(res) {
+        deferred.resolve(res);
+      }, function(err) {
+        deferred.reject(res);
+      });
+
+    });
+  }
+
+  return deferred.promise;
 }
 
 function push(opt) {
