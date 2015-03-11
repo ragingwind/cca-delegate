@@ -271,38 +271,42 @@ function run(opt) {
   opt = opt ? _.merge(execOptions, opt) : {};
 
   var deferred = q.defer();
+  var run = function() {
+    exec(bin, opt, function(std) {
+      var ret = {
+        running: true
+      };
+
+      var runMessage = {
+        'android': [
+          'BUILD SUCCESSFUL',
+          'LAUNCH SUCCESS'
+        ]
+      };
+
+      _.forEach(runMessage[opt.platform], function(m) {
+        if (!$.includes(std.stdout, m)) {
+          return ret.running = false;
+        }
+      });
+
+      return ret;
+    }).then(function(res) {
+      deferred.resolve(res);
+    }, function(err) {
+      deferred.reject(res);
+    });
+  };
 
   if (opt.linkto) {
     linkto(opt.linkto, opt.cwd || process.cwd(), function(err) {
       if (err) {
         return deferred.reject();
       }
-
-      exec(bin, opt, function(std) {
-        var ret = {
-          running: true
-        };
-        var runMessage = {
-          'android': [
-            'BUILD SUCCESSFUL',
-            'LAUNCH SUCCESS'
-          ]
-        };
-
-        _.forEach(runMessage[opt.platform], function(m) {
-          if (!$.includes(std.stdout, m)) {
-            return ret.running = false;
-          }
-        });
-
-        return ret;
-      }).then(function(res) {
-        deferred.resolve(res);
-      }, function(err) {
-        deferred.reject(res);
-      });
-
+      run();
     });
+  } else {
+    run();
   }
 
   return deferred.promise;
