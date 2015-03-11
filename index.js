@@ -253,22 +253,16 @@ function build(platforms, opt) {
 }
 
 function run(opt) {
+  opt = _.merge(execOptions, opt);
+
   if (!$.isSupportedPlatform(opt.platform)) {
     throw new Error('Invalid platforms');
   }
 
-  // %WARN% ios running is not tested fully so
-  // run method doesn't supports ios platform now
-  if (!opt.platform === 'ios') {
-    throw new Error('does not supports ios now');
-  }
-
   var bin = ['cca'];
-
   opt.emulate ? bin.push('emulate') : bin.push('run');
   bin.push(opt.platform);
   opt.release ? bin.push('--release') : bin.push('--debug');
-  opt = opt ? _.merge(execOptions, opt) : {};
 
   var deferred = q.defer();
   var run = function() {
@@ -313,6 +307,7 @@ function run(opt) {
 }
 
 function push(opt) {
+  opt = _.merge(execOptions, opt);
   // %WARN% using usb, which has a lot of issue out of box
   // So it doesn't supports until now
   if (!opt.target) {
@@ -331,13 +326,32 @@ function push(opt) {
   // so that, we can't get stdio result until child process
   // has been running
   opt.watch && bin.push('--watch');
-  opt = opt ? _.merge(execOptions, opt) : {};
 
-  return exec(bin, opt, function(std) {
-    return {
-      pushed: !std.stderr || std.stderr.length === 0
-    }
-  });
+  var deferred = q.defer();
+  var push = function() {
+    exec(bin, opt, function(std) {
+      return {
+        pushed: !std.stderr || std.stderr.length === 0
+      }
+    }).then(function(res) {
+      deferred.resolve(res);
+    }, function(err) {
+      deferred.reject(res);
+    });
+  };
+
+  if (opt.linkto) {
+    linkto(opt.linkto, opt.cwd || process.cwd(), function(err) {
+      if (err) {
+        return deferred.reject();
+      }
+      push();
+    });
+  } else {
+    push();
+  }
+
+  return deferred.promise;
 }
 
 
