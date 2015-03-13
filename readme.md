@@ -4,7 +4,7 @@
 
 ## WARNING
 
-It's still in experimental and cca doesn't supports a official way that we can use in code. This node module try to parse stdio messages from result of execution of cca. The execution result can be changed follow by changes of cca updating that mean is `cca-delegate` can be has risk factors
+It's still in experimental and cca doesn't supports a official way that we can use cca in code programmatic directly. This node module is trying to parse stdio messages getting from result of cca execution. The execution result can be changed follow by any changes of cca updating that mean is `cca-delegate` can be has risk factors
 
 ## Install
 
@@ -12,12 +12,10 @@ It's still in experimental and cca doesn't supports a official way that we can u
 $ npm install --save cca-delegate
 ```
 
-
 ## Methods
 
-`cca-delegate` exported method matches with `cca` commands. You can find mode information from [cca](https://www.npmjs.com/package/cca) and test in this repository.
+`cca-delegate` exported methods matched with `cca` commands and arguments. You can find more information from [cca](https://www.npmjs.com/package/cca) and [test](./test) in this repository. Common execution options based on [exec-then](http://goo.gl/lEn3L8)
 
-- options: Execution options. see [exec-then](http://goo.gl/lEn3L8) for more info.
 - version: `cca --v`
 - checkenv: `cca checkenv`,
 - create: `cca MyApp com.company.my-app`
@@ -32,18 +30,25 @@ $ npm install --save cca-delegate
   + linkto: `String`, You can change www link of cordova project that created with --link-to option
 - push: `cca push --target=192.168.0.30`
 
-
 ```js
 var ccad = require('cca-delegate');
 
 ccad.version().then(function(res) {
   var version = res.params.version;
 });
+
+ccad.run({platform: 'chrome', cwd: './platform'}).then(function(res) {
+  // after job
+});
+
+ccad.push({target: '192.168.0.30'}).then(function(res) {
+  // after pushing is done
+})
 ```
 
 ## License
 
-MIT © [ragingwind](http://github.com/ragingwind)
+MIT © [Jimmy Moon](http://github.com/ragingwind)
 
 
 [npm-url]: https://npmjs.org/package/cca-delegate
