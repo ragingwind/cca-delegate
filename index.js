@@ -5,7 +5,6 @@ var q = require('q');
 var _ = require('lodash');
 var $ = require('./gadget');
 var exec = require('exec-then');
-var linkto = require('cordova-linkto');
 
 var execOptions = {
   verbose: false
@@ -66,7 +65,6 @@ function createProject(opt) {
 
   opt.platform && bin.push('--' + opt.platform);
   opt.copyFrom && bin.push('--copy-from=' + opt.copyFrom);
-  opt.linkTo && bin.push('--link-to=' + opt.linkTo);
 
   return exec(bin, execOptions, function(std, de) {
     var ret = {
@@ -292,16 +290,7 @@ function run(opt) {
     });
   };
 
-  if (opt.linkto) {
-    linkto(opt.linkto, opt.cwd || process.cwd(), function(err) {
-      if (err) {
-        return deferred.reject();
-      }
-      run();
-    });
-  } else {
-    run();
-  }
+  run();
 
   return deferred.promise;
 }
@@ -340,16 +329,7 @@ function push(opt) {
     });
   };
 
-  if (opt.linkto) {
-    linkto(opt.linkto, opt.cwd || process.cwd(), function(err) {
-      if (err) {
-        return deferred.reject();
-      }
-      push();
-    });
-  } else {
-    push();
-  }
+  push();
 
   return deferred.promise;
 }
