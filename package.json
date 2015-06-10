@@ -1,6 +1,6 @@
 {
   "name": "cca-delegate",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "node module for cca (Chrome Mobile Apps) delegate to use programmatically on gulp/Grunt plug-ins and node modules",
   "author": {
     "name": "ragingwind",
