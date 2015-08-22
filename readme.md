@@ -37,7 +37,7 @@ ccad.version().then(function(res) {
   var version = res.params.version;
 });
 
-ccad.run({platform: 'chrome', cwd: './platform'}).then(function(res) {
+ccad.run({platform: 'chrome', cwd:'./platform'}).then(function(res) {
   // after job
 });
 
@@ -46,10 +46,20 @@ ccad.push({target: '192.168.0.30'}).then(function(res) {
 })
 ```
 
+## Test
+
+We recommend that run each test for purpose. Specially, You can run `test:run` command with PLATFORM and TARGET environment variable for running on variety platforms
+
+```
+npm run test:config
+npm run test:platform
+PLATFORM=chrome npm run test:run
+TARGET=192.168.0.2 npm run test:run
+```
+
 ## License
 
 MIT © [Jimmy Moon](http://github.com/ragingwind)
-
 
 [npm-url]: https://npmjs.org/package/cca-delegate
 [npm-image]: https://badge.fury.io/js/cca-delegate.svg

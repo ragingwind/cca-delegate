@@ -151,8 +151,7 @@ function getPlatform() {
 function updatePlatform(platform) {
   return doPlatform('update', platform, function(std) {
     var ret = {};
-
-    var res = /(Android project is now at version\W)(.*)/gi.exec(std.stdout);
+    var res = /(Android project updated with cordova-android\W)(.*)/gi.exec(std.stdout);
     if (res && res[2]) {
       ret.newVersion = res[2];
     }
@@ -228,6 +227,8 @@ function build(platforms, opt) {
   }
 
   opt = opt ? _.merge(execOptions, opt) : {};
+
+  console.log(bin);
 
   return exec(bin, opt, function(std) {
     var ret = {
