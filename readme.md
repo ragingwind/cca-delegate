@@ -4,7 +4,7 @@
 
 ## WARNING
 
-It's still in experimental and cca doesn't supports a official way that we can use cca in code programmatic directly. This node module is trying to parse stdio messages getting from result of cca execution. The execution result can be changed follow by any changes of cca updating that mean is `cca-delegate` can be has risk factors
+It's still in experimental. Currently, cca doesn't support a official way of using cca programmatically in source code. This node module will return result of execution of cca whether true or false after parsing stdio string getting came from cca execution. However the result of execution could be changed by updating of cca that mean is `cca-delegate` could has risk factors
 
 ## Install
 
@@ -14,7 +14,7 @@ $ npm install --save cca-delegate
 
 ## Methods
 
-`cca-delegate` exported methods matched with `cca` commands and arguments. You can find more information from [cca](https://www.npmjs.com/package/cca) and [test](./test) in this repository. Common execution options based on [exec-then](http://goo.gl/lEn3L8)
+`cca-delegate` exports methods with `cca` commands and arguments. You can find more information from [cca](https://www.npmjs.com/package/cca) and [test](./test) at this repository. Options of common execution is based on [exec-then](http://goo.gl/lEn3L8)
 
 - version: `cca --v`
 - checkenv: `cca checkenv`,
@@ -29,6 +29,7 @@ $ npm install --save cca-delegate
 - run: `cca run --debug --watch android` or `cca emulate --debug android`
   + linkto: `String`, You can change www link of cordova project that created with --link-to option
 - push: `cca push --target=192.168.0.30`
+- packageup: package up for android and chrome with built the project
 
 ```js
 var ccad = require('cca-delegate');
@@ -48,13 +49,14 @@ ccad.push({target: '192.168.0.30'}).then(function(res) {
 
 ## Test
 
-We recommend that run each test for purpose. Specially, You can run `test:run` command with PLATFORM and TARGET environment variable for running on variety platforms
+We recommend that run from each test for your purpose with ENV options. You can run `test:run` command with PLATFORM and TARGET environment variable for running of application
 
 ```
 npm run test:config
 npm run test:platform
 PLATFORM=chrome npm run test:run
 TARGET=192.168.0.2 npm run test:run
+npm run test:package
 ```
 
 ## License

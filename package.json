@@ -1,7 +1,7 @@
 {
   "name": "cca-delegate",
   "version": "0.0.15",
-  "description": "node module for cca (Chrome Mobile Apps) delegate to use programmatically on gulp/Grunt plug-ins and node modules",
+  "description": "Chrome Mobile Apps command delegate for using in programmatically on gulp/Grunt plug-ins",
   "author": {
     "name": "ragingwind",
     "email": "ragingwind@gmail.com"
@@ -19,20 +19,24 @@
     "Chrome Apps"
   ],
   "dependencies": {
+    "archiver": "^0.15.1",
     "cordova-linkto": "0.0.3",
+    "cpy": "^3.4.1",
     "exec-then": "^1.3.1",
     "lodash": "^3.10.1",
     "q": "^1.4.1",
     "semver": "^5.0.1"
   },
   "devDependencies": {
+    "globby": "^3.0.1",
     "mkdirp": "^0.5.1",
     "rimraf": "^2.4.2"
   },
   "scripts": {
-    "test": "npm run test:config; npm run test:platform; npm run test:run",
+    "test": "npm run test:config; npm run test:platform; npm run test:run, npm run test:package",
     "test:config": "mocha ./test/test-conf.js",
     "test:platform": "mocha ./test/test-platform.js --timeout=200000",
-    "test:run": "mocha ./test/test-run.js --timeout=200000"
+    "test:run": "mocha ./test/test-run.js --timeout=200000",
+    "test:package": "mocha ./test/test-package.js --timeout=200000"
   }
 }

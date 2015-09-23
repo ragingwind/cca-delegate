@@ -1,11 +1,15 @@
 'use strict';
 
-var spawn = require('child_process').spawn;
 var q = require('q');
 var _ = require('lodash');
 var $ = require('./gadget');
 var exec = require('exec-then');
 var linkto = require('cordova-linkto');
+var archiver = require('archiver');
+var path = require('path');
+var fs = require('fs');
+var mkdirp = require('mkdirp');
+var cpy = require('cpy');
 
 var execOptions = {
   verbose: false
@@ -89,7 +93,7 @@ function createProject(opt) {
   });
 }
 
-function doPlatform(subcmd, platform, proc) {
+function doPlatform(subcmd, opt, platform, proc) {
   if (typeof platform === 'function') {
     proc = platform;
     platform = '';
@@ -99,13 +103,15 @@ function doPlatform(subcmd, platform, proc) {
     }
   }
 
-  return exec(['cca', 'platform', subcmd, platform], execOptions, function(std) {
+  opt = opt ? _.merge(execOptions, opt) : {};
+
+  return exec(['cca', 'platform', subcmd, platform], opt, function(std) {
     return proc(std);
   });
 }
 
-function addPlatform(platform) {
-  return doPlatform('add', platform, function(std) {
+function addPlatform(platform, opts) {
+  return doPlatform('add', opts, platform, function(std) {
     var ret = {
       added: true
     };
@@ -119,8 +125,8 @@ function addPlatform(platform) {
   });
 }
 
-function removePlatform(platform) {
-  return doPlatform('rm', platform, function(std) {
+function removePlatform(platform, opts) {
+  return doPlatform('rm', opts, platform, function(std) {
     var ret = {
       removed: true
     };
@@ -134,8 +140,8 @@ function removePlatform(platform) {
   });
 }
 
-function getPlatform() {
-  return doPlatform('ls', function(std) {
+function getPlatform(opts) {
+  return doPlatform('ls', opts, function(std) {
     var ret = {};
 
     var res = /(Installed platforms:\W)(.*)/gi.exec(std.stdout);
@@ -148,8 +154,8 @@ function getPlatform() {
 }
 
 
-function updatePlatform(platform) {
-  return doPlatform('update', platform, function(std) {
+function updatePlatform(platform, opts) {
+  return doPlatform('update', opts, platform, function(std) {
     var ret = {};
     var res = /(Android project updated with cordova-android\W)(.*)/gi.exec(std.stdout);
     if (res && res[2]) {
@@ -227,8 +233,6 @@ function build(platforms, opt) {
   }
 
   opt = opt ? _.merge(execOptions, opt) : {};
-
-  console.log(bin);
 
   return exec(bin, opt, function(std) {
     var ret = {
@@ -355,6 +359,66 @@ function push(opt) {
   return deferred.promise;
 }
 
+function packageup(dest, opts) {
+  if (!dest) {
+    throw new Error('dest path is invalid');
+  }
+
+  opts = _.merge(execOptions, opts);
+  dest = path.resolve(process.cwd(), dest);
+  opts.cwd = path.resolve(process.cwd(), opts.cwd);
+
+  // create a path for package
+  mkdirp(dest);
+  mkdirp(path.join(dest, 'chrome'));
+  mkdirp(path.join(dest, 'android'));
+
+  var chromeAppName = 'chromeapp' + (opts.version ? '-' + opts.version : '') + '.zip';
+  var deferred = q.defer();
+
+  function copyAndroidApk(cb) {
+    cpy(['*.apk'], path.join(dest, 'android'), {
+      cwd: path.join(opts.cwd, 'platforms/android/build/outputs/apk/')
+    }, cb);
+  }
+
+  function zipChromeApp(cb) {
+    var archive = archiver('zip');
+    var zipfile = fs.createWriteStream(path.join(dest, 'chrome', chromeAppName));
+
+    // zip has been created then resolve a promise
+    zipfile.on('close', cb);
+
+    // create a zip for chrome apps with files under www
+    archive.pipe(zipfile);
+    archive.on('error', cb);
+    archive.bulk([{
+      expand: true,
+      cwd: path.join(opts.cwd, 'www'),
+      src: ['**']
+    }]);
+    archive.finalize();
+  }
+
+  // excute package function chains
+  zipChromeApp(function (err) {
+    if (err) {
+      deferred.reject(err);
+      return;
+    }
+
+    copyAndroidApk(function (err) {
+      if (err) {
+        deferred.reject(err);
+        return;
+      }
+
+      deferred.resolve();
+    });
+  });
+
+  return deferred.promise;
+}
 
 module.exports = {
   options: setOptions,
@@ -369,5 +433,6 @@ module.exports = {
   searchPlugins: searchPlugins,
   build: build,
   run: run,
-  push: push
+  push: push,
+  packageup: packageup
 };
