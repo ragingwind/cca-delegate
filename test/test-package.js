@@ -1,67 +1,58 @@
-/*global describe, it, before, beforeEach */
 'use strict';
 
-var assert = require('assert');
-var rimraf = require('rimraf');
-var path = require('path');
-var ccad = require('../');
-var globby = require('globby');
+import test from 'ava';
+import rimraf from 'rimraf';
+import path from 'path';
+import globby from 'globby';
+import ccad from '../';
 
-describe('cca package', function () {
-  var tmp = path.join(__dirname, 'tmp');
+const tmp = path.join(__dirname, 'tmp');
 
-  beforeEach(function() {
-    ccad.options({
-      verbose: true
-    });
-
-    rimraf.sync(path.join(tmp, 'package'));
+test.beforeEach(() => {
+  ccad.options({
+    verbose: true
   });
 
-  it('should make a zip and copy apks', function (done) {
-    ccad.packageup(path.join(tmp, 'package'), {
-      cwd: path.join(tmp, './myApp'),
-    }).then(function (err) {
-      assert(!err);
+  rimraf.sync(path.join(tmp, 'package'));
+});
 
-      var files = globby.sync(['**/*.zip', '**/*.apk'], {
-        cwd: path.join(tmp, 'package')
-      });
+test.cb('should make a zip and copy apks', t => {
+  ccad.packageup(path.join(tmp, 'package'), {
+    cwd: path.join(tmp, './myApp')
+  }).then(function (err) {
+    t.notOk(err);
 
-      assert.notEqual(files.indexOf('chrome/chromeapp.zip'), -1);
-      assert.notEqual(files.indexOf('android/android-armv7-debug-unaligned.apk'), -1);
-      assert.notEqual(files.indexOf('android/android-armv7-debug.apk'), -1);
-      assert.notEqual(files.indexOf('android/android-x86-debug-unaligned.apk'), -1);
-      assert.notEqual(files.indexOf('android/android-x86-debug.apk'), -1);
-
-      done();
-    }).catch(function (err) {
-      console.err(err);
-
-      assert(false);
-      done();
+    var files = globby.sync(['**/*.zip', '**/*.apk'], {
+      cwd: path.join(tmp, 'package')
     });
+
+    t.notSame(files.indexOf('chrome/chromeapp.zip'), -1);
+    t.notSame(files.indexOf('android/android-armv7-debug-unaligned.apk'), -1);
+    t.notSame(files.indexOf('android/android-armv7-debug.apk'), -1);
+    t.notSame(files.indexOf('android/android-x86-debug-unaligned.apk'), -1);
+    t.notSame(files.indexOf('android/android-x86-debug.apk'), -1);
+    t.end();
+  }).catch(e => {
+    t.fail(e.toString());
+    t.end();
   });
+});
 
-  it('should make a zip with version', function (done) {
-    ccad.packageup(path.join(tmp, 'package'), {
-      version: '1.0.0',
-      cwd: path.join(tmp, './myApp'),
-    }).then(function (err) {
-      assert(!err);
+test.cb('should make a zip with version', t => {
+  ccad.packageup(path.join(tmp, 'package'), {
+    version: '1.0.0',
+    cwd: path.join(tmp, './myApp')
+  }).then(function (err) {
+    t.notOk(err);
 
-      var files = globby.sync(['**/*.zip', '**/*.apk'], {
-        cwd: path.join(tmp, 'package')
-      });
-
-      assert.notEqual(files.indexOf('chrome/chromeapp-1.0.0.zip'), -1);
-
-      done();
-    }).catch(function (err) {
-      console.err(err);
-
-      assert(false);
-      done();
+    var files = globby.sync(['**/*.zip', '**/*.apk'], {
+      cwd: path.join(tmp, 'package')
     });
+
+    t.notSame(files.indexOf('chrome/chromeapp-1.0.0.zip'), -1);
+    t.end();
+  }).catch(e => {
+    t.fail(e.toString());
+    t.end();
   });
 });

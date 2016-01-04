@@ -1,4 +1,4 @@
-#  [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-url]][daviddm-image]
+# cca-delegate
 
 > node module for cca (Chrome Mobile Apps) delegate to use programmatically on gulp/Grunt plug-ins and node modules
 
@@ -62,10 +62,3 @@ npm run test:package
 ## License
 
 MIT © [Jimmy Moon](http://github.com/ragingwind)
-
-[npm-url]: https://npmjs.org/package/cca-delegate
-[npm-image]: https://badge.fury.io/js/cca-delegate.svg
-[travis-url]: https://travis-ci.org/ragingwind/cca-delegate
-[travis-image]: https://travis-ci.org/ragingwind/cca-delegate.svg?branch=master
-[daviddm-url]: https://david-dm.org/ragingwind/cca-delegate.svg?theme=shields.io
-[daviddm-image]: https://david-dm.org/ragingwind/cca-delegate

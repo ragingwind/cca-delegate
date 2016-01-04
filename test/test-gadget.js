@@ -1,24 +1,18 @@
-/*global describe, it */
 'use strict';
 
-var assert = require('assert');
-var path = require('path');
-var $ = require('../gadget');
+import test from 'ava';
+import $ from '../gadget';
 
-describe('gadget', function () {
-  it('should be passed test', function (done) {
-    // package name
-    assert.ok($.isPackageName('com.company.myapp'), 'valid package name');
-    assert.equal(false, $.isPackageName('company.myapp'), 'not valid package name');
+test('should be passed test', t => {
+  // package name
+  t.ok($.isPackageName('com.company.myapp'), 'valid package name');
+  t.is(false, $.isPackageName('company.myapp'), 'not valid package name');
 
-    // platform checking
-    assert.ok($.isSupportedPlatform('android'), 'is valid platform');
-    assert.ok($.isSupportedPlatform('ios'), 'is valid platform');
-    assert.ok($.isSupportedPlatform('chrome'), 'is valid platform');
-    assert.equal(false, $.isSupportedPlatform('bada'), 'is not valid platform');
-    assert.ok($.isSupportedPlatform(['android', 'ios']), 'is valid platform');
-    assert.equal(false, $.isSupportedPlatform(['androd', 'ios', 'bada']), 'is not valid platform');
-
-    done();
-  });
+  // platform checking
+  t.ok($.isSupportedPlatform('android'), 'is valid platform');
+  t.ok($.isSupportedPlatform('ios'), 'is valid platform');
+  t.ok($.isSupportedPlatform('chrome'), 'is valid platform');
+  t.is(false, $.isSupportedPlatform('bada'), 'is not valid platform');
+  t.ok($.isSupportedPlatform(['android', 'ios']), 'is valid platform');
+  t.is(false, $.isSupportedPlatform(['androd', 'ios', 'bada']), 'is not valid platform');
 });

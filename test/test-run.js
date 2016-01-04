@@ -1,86 +1,87 @@
-/*global describe, it, before, beforeEach */
 'use strict';
 
-var assert = require('assert');
-var mkdirp = require('mkdirp');
-var rimraf = require('rimraf');
-var path = require('path');
-var ccad = require('../');
-var target = process.env.TARGET;
-var platform = process.env.PLATFORM || 'android';
+import test from 'ava';
+import path from 'path';
+import mkdirp from 'mkdirp';
+import rimraf from 'rimraf';
+import ccad from '../';
+
+const target = process.env.TARGET;
+const platform = process.env.PLATFORM || 'android';
 
 if (!/^android?|^ios?|^chrome?/.test(platform)) {
   console.error('Invalid platform has been passed', platform);
   process.exit(-1);
 }
 
-describe('cca delegate', function () {
-  var tmp = path.join(__dirname, 'tmp');
-  var cwd = process.cwd();
+const tmp = path.join(__dirname, 'tmp');
+const cwd = process.cwd();
 
-  before(function() {
-    ccad.options({
-      verbose: true
-    });
-
-    rimraf.sync(tmp);
-    mkdirp(tmp);
+test.before(() => {
+  ccad.options({
+    verbose: true
   });
 
-  beforeEach(function() {
-    process.chdir(cwd);
+  rimraf.sync(tmp);
+  mkdirp(tmp);
+});
+
+test.beforeEach(() => {
+  process.chdir(cwd);
+});
+
+test('should be created a new project', t => {
+  return ccad.create({
+    directory: path.join(tmp, 'myApp'),
+    name: 'com.company.myapp'
+  }).then(res => {
+    t.ok(res.params.created);
+  }).catch(e => {
+    t.is(false, e.toString());
   });
+});
 
-  var catcher = function(e) {
-    assert(false, e.toString());
-  };
-
-  it('should be created a new project', function () {
-    return ccad.create({
-      directory: path.join(tmp, 'myApp'),
-      name: 'com.company.myapp'
-    }).then(function(res) {
-      assert(res.params.created);
-    }).catch(catcher);
-  });
-
-  if (platform !== 'chrome') {
-    it('android platform should be added', function () {
-      process.chdir(path.join(tmp, 'myApp'));
-
-      return ccad.addPlatform(platform).then(function(res) {
-        assert(res.params.added);
-      }).catch(catcher);
-    });
-
-    it('should be built successfully', function () {
-      process.chdir(path.join(tmp, 'myApp'));
-
-      return ccad.build([platform], {
-        maxBuffer: 1000 * 1024,
-        timeout:0
-      }).then(function(res) {
-        assert(res.params.build);
-      }).catch(catcher);
-    });
-  }
-
-
-  it('should be running successfully', function () {
+if (platform !== 'chrome') {
+  test('android platform should be added', t => {
     process.chdir(path.join(tmp, 'myApp'));
 
-    var opts = {
-      platform: platform,
-    };
+    return ccad.addPlatform(platform).then(res => {
+      t.ok(res.params.added);
+    }).catch(e => {
+      t.is(false, e.toString());
+    });
+  });
 
-    if (target) {
-      opts.target = target;
-    } else if (platform !== 'chrome') {
-      opts.emulate = true;
-    }
+  test('should be built successfully', t => {
+    process.chdir(path.join(tmp, 'myApp'));
 
-    return ccad.run(opts).then(function(res) {
-      assert(res.params.running);
-    }).catch(catcher);
+    return ccad.build([platform], {
+      maxBuffer: 1000 * 1024,
+      timeout: 0
+    }).then(res => {
+      t.ok(res.params.build);
+    }).catch(e => {
+      t.is(false, e.toString());
+    });
+  });
+}
+
+test('should be running successfully', t => {
+  process.chdir(path.join(tmp, 'myApp'));
+
+  var opts = {
+    platform: platform
+  };
+
+  if (target) {
+    opts.target = target;
+  } else if (platform !== 'chrome') {
+    opts.emulate = true;
+  }
+
+  return ccad.run(opts).then(res => {
+    t.ok(res.params.running);
+  }).catch(e => {
+    t.is(false, e.toString());
   });
 });

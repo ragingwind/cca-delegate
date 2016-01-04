@@ -29,14 +29,22 @@
     "mkdirp": "^0.5.1"
   },
   "devDependencies": {
+    "ava": "^0.9.1",
     "globby": "^3.0.1",
-    "rimraf": "^2.4.2"
+    "mocha": "^2.3.4",
+    "rimraf": "^2.4.2",
+    "xo": "^0.12.1"
   },
   "scripts": {
-    "test": "npm run test:config; npm run test:platform; npm run test:run, npm run test:package",
-    "test:config": "mocha ./test/test-conf.js",
-    "test:platform": "mocha ./test/test-platform.js --timeout=200000",
-    "test:run": "mocha ./test/test-run.js --timeout=200000",
-    "test:package": "mocha ./test/test-package.js --timeout=200000"
+    "test": "xo && ava --serial ./test/test-platform.js",
+    "test:config": "mocha ./test/test-conf.js --timeout=400000",
+    "test:platform": "mocha ./test/test-platform.js --timeout=400000",
+    "test:package": "mocha ./test/test-package.js --timeout=400000"
+  },
+  "xo": {
+    "space": 2,
+    "ignores": [
+      "test/tmp/**"
+    ]
   }
 }

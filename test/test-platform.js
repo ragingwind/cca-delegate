@@ -1,101 +1,94 @@
-/*global describe, it, before, beforeEach */
 'use strict';
 
-var assert = require('assert');
-var mkdirp = require('mkdirp');
-var rimraf = require('rimraf');
-var path = require('path');
-var ccad = require('../');
+import test from 'ava';
+import rimraf from 'rimraf';
+import path from 'path';
+import mkdirp from 'mkdirp';
+import ccad from '../';
 
-describe('cca delegate', function () {
-  var tmp = path.join(__dirname, 'tmp');
-  var cwd = process.cwd();
+const tmp = path.join(__dirname, 'tmp');
+const cwd = process.cwd();
 
-  before(function() {
-    ccad.options({
-      verbose: true
-    });
-
-    rimraf.sync(tmp);
-    mkdirp(tmp);
+test.before(() => {
+  ccad.options({
+    verbose: true
   });
 
-  beforeEach(function() {
-    process.chdir(cwd);
+  rimraf.sync(tmp);
+  mkdirp(tmp);
+});
+
+test.beforeEach(() => {
+  process.chdir(cwd);
+});
+
+test.serial('should be created a new project', t => {
+  return ccad.create({
+    directory: path.join(tmp, 'myApp'),
+    name: 'com.company.myapp'
+  }).then(res => {
+    t.ok(res.params.created);
   });
+});
 
-  var catcher = function(e) {
-    assert(false, e.toString());
-  };
+test.serial('android platform should be added', t => {
+  process.chdir(path.join(tmp, 'myApp'));
 
-  it('should be created a new project', function () {
-    return ccad.create({
-      directory: path.join(tmp, 'myApp'),
-      name: 'com.company.myapp'
-    }).then(function(res) {
-      assert(res.params.created);
-    }).catch(catcher);
+  return ccad.addPlatform('android').then(res => {
+    t.ok(res.params.added);
   });
+});
 
-  it('android platform should be added', function () {
-    process.chdir(path.join(tmp, 'myApp'));
+test.serial('should added ios platform', t => {
+  process.chdir(path.join(tmp, 'myApp'));
 
-    return ccad.addPlatform('android').then(function(res) {
-      assert(res.params.added);
-    }).catch(catcher);
+  return ccad.addPlatform('ios').then(res => {
+    t.ok(res.params.added);
   });
+});
 
-  it('should added ios platform', function () {
-    process.chdir(path.join(tmp, 'myApp'));
+test.serial('should returns platform list', t => {
+  process.chdir(path.join(tmp, 'myApp'));
 
-    return ccad.addPlatform('ios').then(function(res) {
-      assert(res.params.added);
-    }).catch(catcher);
+  return ccad.getPlatform().then(res => {
+    t.ok(res.params.platforms && res.params.platforms.length >= 0);
+    t.ok(res.params.platforms[0].indexOf('android') !== -1);
   });
+});
 
-  it('should returns platform list', function () {
-    process.chdir(path.join(tmp, 'myApp'));
+test.serial('android platform should be updated to newer', t => {
+  process.chdir(path.join(tmp, 'myApp'));
 
-    return ccad.getPlatform().then(function(res) {
-      assert(res.params.platforms && res.params.platforms.length >= 0);
-      assert(res.params.platforms[0].indexOf('android') !== -1);
-    }).catch(catcher);
+  return ccad.updatePlatform('android').then(res => {
+    t.ok(res.params.newVersion);
   });
+});
 
-  it('android platform should be updated to newer', function () {
-    process.chdir(path.join(tmp, 'myApp'));
+test.serial('should returns all of plug-ins', t => {
+  process.chdir(path.join(tmp, 'myApp'));
 
-    return ccad.updatePlatform('android').then(function(res) {
-      assert(res.params.newVersion);
-    }).catch(catcher);
+  return ccad.getPlugins().then(res => {
+    t.ok(res.params.plugins);
+    t.ok(res.params.plugins.length >= 0);
   });
+});
 
-  it('should returns all of plug-ins', function () {
-    process.chdir(path.join(tmp, 'myApp'));
+test.serial('should returns chromium plug-ins', t => {
+  process.chdir(path.join(tmp, 'myApp'));
 
-    return ccad.getPlugins().then(function(res) {
-      assert(res.params.plugins);
-      assert(res.params.plugins.length >= 0);
-    }).catch(catcher);
+  return ccad.searchPlugins('chromium').then(res => {
+    t.ok(res.params.plugins);
+    t.ok(res.params.plugins.length >= 0);
   });
+});
 
-  it('should returns chromium plug-ins', function () {
-    process.chdir(path.join(tmp, 'myApp'));
+test.serial('should be built successfully', t => {
+  process.chdir(path.join(tmp, 'myApp'));
 
-    return ccad.searchPlugins('chromium').then(function(res) {
-      assert(res.params.plugins);
-      assert(res.params.plugins.length >= 0);
-    }).catch(catcher);
-  });
-
-  it('should be built successfully', function () {
-    process.chdir(path.join(tmp, 'myApp'));
-
-    return ccad.build(['android', 'ios'], {
-      maxBuffer: 1000 * 1024,
-      timeout:0
-    }).then(function(res) {
-      assert(res.params.build);
-    }).catch(catcher);
+  return ccad.build(['android', 'ios'], {
+    maxBuffer: 1000 * 1024,
+    timeout: 0
+  }).then(res => {
+    t.ok(res.params.build);
   });
 });

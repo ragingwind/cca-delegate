@@ -20,7 +20,7 @@ function setOptions(opt) {
 }
 
 function getVersion() {
-  return exec('cca --v', execOptions, function(std, de) {
+  return exec('cca --v', execOptions, function (std) {
     var ret = {
       version: $.getValidSemVer(std.stdout)
     };
@@ -34,7 +34,7 @@ function getVersion() {
 }
 
 function checkenv() {
-  return exec(['cca', 'checkenv'], execOptions, function(std, de) {
+  return exec(['cca', 'checkenv'], execOptions, function (std) {
     var res = null;
     var rx = /(Android|iOS)(.*?)*/gi;
     var ret = {
@@ -63,16 +63,24 @@ function createProject(opt) {
   }
 
   if (opt.platform && !$.isSupportedPlatform(opt.platform)) {
-    throw new Error('It is invalid platform ' + opt.platform)
+    throw new Error('It is invalid platform ' + opt.platform);
   }
 
   var bin = ['cca', 'create', opt.directory, opt.name];
 
-  opt.platform && bin.push('--' + opt.platform);
-  opt.copyFrom && bin.push('--copy-from=' + opt.copyFrom);
-  opt.linkTo && bin.push('--link-to=' + opt.linkTo);
+  if (opt.platform) {
+    bin.push('--' + opt.platform);
+  }
 
-  return exec(bin, execOptions, function(std, de) {
+  if (opt.copyFrom) {
+    bin.push('--copy-from=' + opt.copyFrom);
+  }
+
+  if (opt.linkTo) {
+    bin.push('--link-to=' + opt.linkTo);
+  }
+
+  return exec(bin, execOptions, function (std) {
     var ret = {
       created: true
     };
@@ -81,7 +89,7 @@ function createProject(opt) {
       'App id contains a reserved word'
     ];
 
-    _.forEach(errs, function(e) {
+    _.forEach(errs, function (e) {
       if ($.includes(std.stderr, e)) {
         ret.created = false;
         ret.err = new Error('Failed to create a new Project, Reason: ' + std.stderr);
@@ -97,21 +105,19 @@ function doPlatform(subcmd, opt, platform, proc) {
   if (typeof platform === 'function') {
     proc = platform;
     platform = '';
-  } else {
-    if (!$.isSupportedPlatform(platform)) {
-      throw new Error(platform + ' is not supported platform');
-    }
+  } else if (!$.isSupportedPlatform(platform)) {
+    throw new Error(platform + ' is not supported platform');
   }
 
   opt = opt ? _.merge(execOptions, opt) : {};
 
-  return exec(['cca', 'platform', subcmd, platform], opt, function(std) {
+  return exec(['cca', 'platform', subcmd, platform], opt, function (std) {
     return proc(std);
   });
 }
 
 function addPlatform(platform, opts) {
-  return doPlatform('add', opts, platform, function(std) {
+  return doPlatform('add', opts, platform, function (std) {
     var ret = {
       added: true
     };
@@ -126,7 +132,7 @@ function addPlatform(platform, opts) {
 }
 
 function removePlatform(platform, opts) {
-  return doPlatform('rm', opts, platform, function(std) {
+  return doPlatform('rm', opts, platform, function (std) {
     var ret = {
       removed: true
     };
@@ -141,7 +147,7 @@ function removePlatform(platform, opts) {
 }
 
 function getPlatform(opts) {
-  return doPlatform('ls', opts, function(std) {
+  return doPlatform('ls', opts, function (std) {
     var ret = {};
 
     var res = /(Installed platforms:\W)(.*)/gi.exec(std.stdout);
@@ -153,9 +159,8 @@ function getPlatform(opts) {
   });
 }
 
-
 function updatePlatform(platform, opts) {
-  return doPlatform('update', opts, platform, function(std) {
+  return doPlatform('update', opts, platform, function (std) {
     var ret = {};
     var res = /(Android project updated with cordova-android\W)(.*)/gi.exec(std.stdout);
     if (res && res[2]) {
@@ -167,7 +172,7 @@ function updatePlatform(platform, opts) {
 }
 
 function getPlugins() {
-  return exec(['cca', 'plugin', 'ls'], execOptions, function(std) {
+  return exec(['cca', 'plugin', 'ls'], execOptions, function (std) {
     var ret = {};
 
     if (!std.stderr) {
@@ -193,7 +198,7 @@ function getPlugins() {
 }
 
 function searchPlugins(keyword) {
-  return exec(['cca', 'plugin', 'search', keyword], execOptions, function(std) {
+  return exec(['cca', 'plugin', 'search', keyword], execOptions, function (std) {
     var ret = {};
 
     if (!std.stderr) {
@@ -211,7 +216,7 @@ function searchPlugins(keyword) {
           desc: p[1]
         });
       }
-    };
+    }
 
     return ret;
   });
@@ -234,17 +239,17 @@ function build(platforms, opt) {
 
   opt = opt ? _.merge(execOptions, opt) : {};
 
-  return exec(bin, opt, function(std) {
+  return exec(bin, opt, function (std) {
     var ret = {
       build: true
     };
 
     var buildMessage = {
-      'android': 'BUILD SUCCESSFUL',
-      'ios': 'BUILD SUCCEEDED'
+      android: 'BUILD SUCCESSFUL',
+      ios: 'BUILD SUCCEEDED'
     };
 
-    _.forEach(platforms, function(p) {
+    _.forEach(platforms, function (p) {
       if (buildMessage[p]) {
         if (!$.includes(std.stdout, buildMessage[p])) {
           ret.build = false;
@@ -265,47 +270,60 @@ function run(opt) {
   }
 
   var bin = ['cca'];
-  opt.emulate ? bin.push('emulate') : bin.push('run');
+
+  if (opt.emulate) {
+    bin.push('emulate');
+  } else {
+    bin.push('run');
+  }
+
   bin.push(opt.platform);
-  opt.release ? bin.push('--release') : bin.push('--debug');
+
+  if (opt.release) {
+    bin.push('--release');
+  } else {
+    bin.push('--debug');
+  }
 
   var deferred = q.defer();
-  var run = function() {
-    exec(bin, opt, function(std) {
+  var runBin = function () {
+    exec(bin, opt, function (std) {
       var ret = {
         running: true
       };
 
       var runMessage = {
-        'android': [
+        android: [
           'BUILD SUCCESSFUL',
           'LAUNCH SUCCESS'
         ]
       };
 
-      _.forEach(runMessage[opt.platform], function(m) {
+      _.forEach(runMessage[opt.platform], function (m) {
         if (!$.includes(std.stdout, m)) {
-          return ret.running = false;
+          ret.running = false;
+          return ret.running;
         }
       });
 
       return ret;
-    }).then(function(res) {
+    }).then(function (res) {
       deferred.resolve(res);
-    }, function(err) {
-      deferred.reject(res);
+    }, function (err) {
+      deferred.reject(err);
     });
   };
 
   if (opt.linkto) {
-    linkto(opt.linkto, opt.cwd || process.cwd(), function(err) {
+    linkto(opt.linkto, opt.cwd || process.cwd(), function (err) {
       if (err) {
         return deferred.reject();
       }
-      run();
+
+      runBin();
     });
   } else {
-    run();
+    runBin();
   }
 
   return deferred.promise;
@@ -325,35 +343,40 @@ function push(opt) {
     opt.target += ':' + opt.port;
   }
 
-  opt.target && bin.push('--target=' + opt.target);
+  if (opt.target) {
+    bin.push('--target=' + opt.target);
+  }
+
   // watch mode makes child process running like daemon
   // that mean is child process will not return back immediately
   // so that, we can't get stdio result until child process
   // has been running
-  opt.watch && bin.push('--watch');
+  if (opt.watch) {
+    bin.push('--watch');
+  }
 
   var deferred = q.defer();
-  var push = function() {
-    exec(bin, opt, function(std) {
+  var pushBin = function () {
+    exec(bin, opt, function (std) {
       return {
         pushed: !std.stderr || std.stderr.length === 0
-      }
-    }).then(function(res) {
+      };
+    }).then(function (res) {
       deferred.resolve(res);
-    }, function(err) {
+    }, function (res) {
       deferred.reject(res);
     });
   };
 
   if (opt.linkto) {
-    linkto(opt.linkto, opt.cwd || process.cwd(), function(err) {
+    linkto(opt.linkto, opt.cwd || process.cwd(), function (err) {
       if (err) {
         return deferred.reject();
       }
-      push();
+      pushBin();
     });
   } else {
-    push();
+    pushBin();
   }
 
   return deferred.promise;
