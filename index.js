@@ -441,7 +441,6 @@ module.exports = {
   getPlatform: getPlatform,
   updatePlatform: updatePlatform,
   getPlugins: getPlugins,
-  searchPlugins: searchPlugins,
   build: build,
   run: run,
   push: push,

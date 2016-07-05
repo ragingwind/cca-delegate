@@ -6,6 +6,10 @@
 
 It's still in experimental. Currently, cca doesn't support a official way of using cca programmatically in source code. This node module will return result of execution of cca whether true or false after parsing stdio string getting came from cca execution. However the result of execution could be changed by updating of cca that mean is `cca-delegate` could has risk factors
 
+### Deprecated
+
+- searchPlugins: Because of cca 0.8.1 return timeout without any result
+
 ## Install
 
 ```sh

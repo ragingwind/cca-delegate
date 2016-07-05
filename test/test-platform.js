@@ -68,15 +68,6 @@ test.serial('should returns all of plug-ins', t => {
   });
 });
 
-// Will be deprecated test caused by timout from cca plugin search at v0.8.1
-// test.serial('should returns chromium plug-ins', t => {
-//   process.chdir(path.join(tmp, 'myApp'));
-//   return ccad.searchPlugins('chromium').then(res => {
-//     t.truthy(res.params.plugins);
-//     t.true(res.params.plugins.length >= 0);
-//   });
-// });
-
 test.serial('should be built successfully', t => {
   process.chdir(path.join(tmp, 'myApp'));
 
