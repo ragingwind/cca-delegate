@@ -1,15 +1,15 @@
 'use strict';
 
+var path = require('path');
+var fs = require('fs');
 var q = require('q');
 var _ = require('lodash');
-var $ = require('./gadget');
 var exec = require('exec-then');
 var linkto = require('cordova-linkto');
 var archiver = require('archiver');
-var path = require('path');
-var fs = require('fs');
 var mkdirp = require('mkdirp');
 var cpy = require('cpy');
+var $ = require('./gadget');
 
 var execOptions = {
   verbose: false
@@ -188,7 +188,7 @@ function getPlugins() {
         ret.plugins.push({
           id: p[0],
           version: p[1],
-          name: /(\"(.*?)\"$)/i.exec(res[i])[0]
+          name: /("(.*?)"$)/i.exec(res[i])[0]
         });
       }
     }
@@ -399,12 +399,6 @@ function packageup(dest, opts) {
   var chromeAppName = 'chromeapp' + (opts.version ? '-' + opts.version : '') + '.zip';
   var deferred = q.defer();
 
-  function copyAndroidApk(cb) {
-    cpy(['*.apk'], path.join(dest, 'android'), {
-      cwd: path.join(opts.cwd, 'platforms/android/build/outputs/apk/')
-    }, cb);
-  }
-
   function zipChromeApp(cb) {
     var archive = archiver('zip');
     var zipfile = fs.createWriteStream(path.join(dest, 'chrome', chromeAppName));
@@ -424,19 +418,13 @@ function packageup(dest, opts) {
   }
 
   // excute package function chains
-  zipChromeApp(function (err) {
-    if (err) {
-      deferred.reject(err);
-      return;
-    }
-
-    copyAndroidApk(function (err) {
-      if (err) {
-        deferred.reject(err);
-        return;
-      }
-
+  zipChromeApp(function () {
+    cpy(['*.apk'], path.join(dest, 'android'), {
+      cwd: path.join(opts.cwd, 'platforms/android/build/outputs/apk/')
+    }).then(() => {
       deferred.resolve();
+    }).catch(err => {
+      deferred.reject(err);
     });
   });
 

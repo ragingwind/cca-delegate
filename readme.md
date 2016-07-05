@@ -51,12 +51,17 @@ ccad.push({target: '192.168.0.30'}).then(function(res) {
 
 We recommend that run from each test for your purpose with ENV options. You can run `test:run` command with PLATFORM and TARGET environment variable for running of application
 
+### Test APIs
+
 ```
-npm run test:config
-npm run test:platform
+npm test
+```
+
+### Test App Running with specific platform
+
+```
 PLATFORM=chrome npm run test:run
 TARGET=192.168.0.2 npm run test:run
-npm run test:package
 ```
 
 ## License

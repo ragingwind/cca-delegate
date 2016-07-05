@@ -1,7 +1,7 @@
 'use strict';
 
-import test from 'ava';
 import path from 'path';
+import test from 'ava';
 import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
 import ccad from '../';
@@ -10,8 +10,7 @@ const target = process.env.TARGET;
 const platform = process.env.PLATFORM || 'android';
 
 if (!/^android?|^ios?|^chrome?/.test(platform)) {
-  console.error('Invalid platform has been passed', platform);
-  process.exit(-1);
+  throw new Error('Invalid platform has been passed ' + platform);
 }
 
 const tmp = path.join(__dirname, 'tmp');
@@ -19,7 +18,7 @@ const cwd = process.cwd();
 
 test.before(() => {
   ccad.options({
-    verbose: true
+    verbose: false
   });
 
   rimraf.sync(tmp);
@@ -35,9 +34,9 @@ test('should be created a new project', t => {
     directory: path.join(tmp, 'myApp'),
     name: 'com.company.myapp'
   }).then(res => {
-    t.ok(res.params.created);
-  }).catch(e => {
-    t.is(false, e.toString());
+    t.true(res.params.created);
+  }).catch(err => {
+    t.is(false, err.toString());
   });
 });
 
@@ -46,9 +45,9 @@ if (platform !== 'chrome') {
     process.chdir(path.join(tmp, 'myApp'));
 
     return ccad.addPlatform(platform).then(res => {
-      t.ok(res.params.added);
-    }).catch(e => {
-      t.is(false, e.toString());
+      t.true(res.params.added);
+    }).catch(err => {
+      t.is(false, err.toString());
     });
   });
 
@@ -59,9 +58,9 @@ if (platform !== 'chrome') {
       maxBuffer: 1000 * 1024,
       timeout: 0
     }).then(res => {
-      t.ok(res.params.build);
-    }).catch(e => {
-      t.is(false, e.toString());
+      t.true(res.params.build);
+    }).catch(err => {
+      t.is(false, err.toString());
     });
   });
 }
@@ -80,8 +79,8 @@ test('should be running successfully', t => {
   }
 
   return ccad.run(opts).then(res => {
-    t.ok(res.params.running);
-  }).catch(e => {
-    t.is(false, e.toString());
+    t.true(res.params.running);
+  }).catch(err => {
+    t.is(false, err.toString());
   });
 });

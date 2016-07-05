@@ -7,7 +7,7 @@ var cwd = process.cwd();
 
 test.before(() => {
   ccad.options({
-    verbose: true
+    verbose: false
   });
 });
 
@@ -17,16 +17,16 @@ test.beforeEach(() => {
 
 test('should return its version', t => {
   return ccad.version().then(function (res) {
-    t.ok(res.params.version, 'Probably, cca has not been installed');
-  }).catch(e => {
-    t.is(false, e.toString());
+    t.truthy(res.params.version, 'Probably, cca has not been installed');
+  }).catch(err => {
+    t.is(false, err.toString());
   });
 });
 
 test('should be prepared', t => {
   return ccad.checkenv().then(function (res) {
-    t.ok(res.params.checkenv, 'You need to set up environments for cca');
-  }).catch(e => {
-    t.is(false, e.toString());
+    t.truthy(res.params.checkenv, 'You need to set up environments for cca');
+  }).catch(err => {
+    t.is(false, err.toString());
   });
 });
