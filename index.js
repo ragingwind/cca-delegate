@@ -1,17 +1,18 @@
 'use strict';
 
-var path = require('path');
-var fs = require('fs');
-var q = require('q');
-var _ = require('lodash');
-var exec = require('exec-then');
-var linkto = require('cordova-linkto');
-var archiver = require('archiver');
-var mkdirp = require('mkdirp');
-var cpy = require('cpy');
-var $ = require('./gadget');
+const path = require('path');
+const fs = require('fs');
+const q = require('q');
+const _ = require('lodash');
+const exec = require('exec-then');
+const linkto = require('cordova-linkto');
+const archiver = require('archiver');
+const mkdirp = require('mkdirp');
+const cpy = require('cpy');
+const execa = require('execa');
+const $ = require('./gadget');
 
-var execOptions = {
+let execOptions = {
   verbose: false
 };
 
@@ -20,13 +21,13 @@ function setOptions(opt) {
 }
 
 function getVersion() {
-  return exec('cca --v', execOptions, function (std) {
-    var ret = {
-      version: $.getValidSemVer(std.stdout)
+  return execa('cca', ['--v']).then(res => {
+    const ret = {
+      version: $.getValidSemVer(res.stdout)
     };
 
     if (!ret.version) {
-      ret.err = new Error('cca is not ready');
+      throw new Error('cca is not ready');
     }
 
     return ret;
@@ -34,15 +35,15 @@ function getVersion() {
 }
 
 function checkenv() {
-  return exec(['cca', 'checkenv'], execOptions, function (std) {
-    var res = null;
-    var rx = /(Android|iOS)(.*?)*/gi;
-    var ret = {
+  return execa('cca', ['checkenv']).then(res => {
+    let re = null;
+    const rx = /(Android|iOS)(.*?)*/gi;
+    const ret = {
       checkenv: true
     };
 
-    while ((res = rx.exec(std.stderr)) !== null) {
-      if (!$.includes(res[0], 'properly')) {
+    while ((re = rx.exec(res.stderr)) !== null) {
+      if (!$.includes(re[0], 'properly')) {
         ret.checkenv = false;
         ret.err = new Error('Platforms are not properly');
         break;
@@ -189,31 +190,6 @@ function getPlugins() {
           id: p[0],
           version: p[1],
           name: /("(.*?)"$)/i.exec(res[i])[0]
-        });
-      }
-    }
-
-    return ret;
-  });
-}
-
-function searchPlugins(keyword) {
-  return exec(['cca', 'plugin', 'search', keyword], execOptions, function (std) {
-    var ret = {};
-
-    if (!std.stderr) {
-      var res = std.stdout.trim().split('\n');
-
-      // Should be more than 1
-      if (res.length > 1) {
-        ret.plugins = [];
-      }
-
-      for (var i = 1; i < res.length; ++i) {
-        var p = res[i].split(' - ');
-        ret.plugins.push({
-          id: p[0],
-          desc: p[1]
         });
       }
     }
