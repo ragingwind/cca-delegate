@@ -1,29 +1,22 @@
 'use strict';
 
-import path from 'path';
 import test from 'ava';
-import mkdirp from 'mkdirp';
 import ccad from '../';
+import envs from './envs';
 
-const tmp = path.join(__dirname, 'tmp');
-
-test.before(() => {
-  ccad.options({
-    verbose: false
-  });
-
-  mkdirp(tmp);
+test.beforeEach(() => {
+  envs.chcwd();
 });
 
-test.serial('should be built successfully', t => {
-  process.chdir(path.join(tmp, 'myApp'));
+// const tmp = path.join(__dirname, 'tmp');
 
-  return ccad.build(['android'], {
-    maxBuffer: 1000 * 1024,
-    timeout: 0
-  }).then(res => {
-    t.true(res.params.build);
+test.serial('should be built successfully', t => {
+  envs.chappd();
+
+  return ccad.build(['android']).then(res => {
+    t.true(res.build);
   }).catch(err => {
-    t.is(false, err.toString());
+    console.log(err);
+    t.fail(err.toString());
   });
 });

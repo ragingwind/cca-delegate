@@ -1,80 +1,60 @@
 'use strict';
 
-import path from 'path';
 import test from 'ava';
 import ccad from '../';
-
-const tmp = path.join(__dirname, 'tmp');
-const cwd = process.cwd();
-
-test.before(() => {
-  ccad.options({
-    verbose: false
-  });
-});
+import envs from './envs';
 
 test.beforeEach(() => {
-  process.chdir(cwd);
+  envs.chcwd();
 });
 
 test.serial('should be created a new project', t => {
   return ccad.create({
-    directory: path.join(tmp, 'myApp'),
+    directory: envs.appd(),
     name: 'com.company.myapp'
   }).then(res => {
-    t.true(res.params.created);
+    t.true(res.created);
   });
 });
 
 test.serial('android platform should be added', t => {
-  process.chdir(path.join(tmp, 'myApp'));
+  envs.chappd();
 
-  return ccad.addPlatform('android').then(res => {
-    t.true(res.params.added);
+  return ccad.addPlatform({platform: 'android'}).then(res => {
+    t.true(res.added);
   });
 });
 
 test.serial('should added ios platform', t => {
-  process.chdir(path.join(tmp, 'myApp'));
+  envs.chappd();
 
-  return ccad.addPlatform('ios').then(res => {
-    t.true(res.params.added);
+  return ccad.addPlatform({platform: 'ios'}).then(res => {
+    t.true(res.added);
   });
 });
 
 test.serial('should returns platform list', t => {
-  process.chdir(path.join(tmp, 'myApp'));
+  envs.chappd();
 
   return ccad.getPlatform().then(res => {
-    t.true(res.params.platforms && res.params.platforms.length >= 0);
-    t.true(res.params.platforms[0].indexOf('android') !== -1);
+    t.true(res.platforms && res.platforms.length >= 0);
+    t.true(res.platforms[0].indexOf('android') !== -1);
   });
 });
 
 test.serial('android platform should be updated to newer', t => {
-  process.chdir(path.join(tmp, 'myApp'));
+  envs.chappd();
 
-  return ccad.updatePlatform('android').then(res => {
-    t.truthy(res.params.newVersion);
+  return ccad.updatePlatform({platform: 'android'}).then(res => {
+    t.truthy(res.newVersion);
   });
 });
 
 test.serial('should returns all of plug-ins', t => {
-  process.chdir(path.join(tmp, 'myApp'));
+  envs.chappd();
 
   return ccad.getPlugins().then(res => {
-    t.truthy(res.params.plugins);
-    t.true(res.params.plugins.length >= 0);
-  });
-});
-
-test.serial('should be built successfully', t => {
-  process.chdir(path.join(tmp, 'myApp'));
-
-  return ccad.build(['android', 'ios'], {
-    maxBuffer: 1000 * 1024,
-    timeout: 0
-  }).then(res => {
-    t.true(res.params.build);
+    t.truthy(res.plugins);
+    t.true(res.plugins.length >= 0);
   });
 });

@@ -36,18 +36,22 @@ $ npm install --save cca-delegate
 - packageup: package up for android and chrome with built the project
 
 ```js
-var ccad = require('cca-delegate');
+const ccad = require('cca-delegate');
 
-ccad.version().then(function(res) {
-  var version = res.params.version;
-});
-
-ccad.run({platform: 'chrome', cwd:'./platform'}).then(function(res) {
+ccad.version().then(() => {
   // after job
 });
 
-ccad.push({target: '192.168.0.30'}).then(function(res) {
-  // after pushing is done
+ccad.create({directory: './', name: 'com.company.myapp'}).then(res => {
+  // after job
+});
+
+ccad.run({platform: 'chrome', cwd:'./platform'}).then(() => {
+  // after job
+});
+
+ccad.push({target: '192.168.0.30'}).then(() => {
+  // after job
 })
 ```
 

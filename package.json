@@ -20,13 +20,14 @@
   ],
   "dependencies": {
     "archiver": "^1.0.0",
-    "cordova-linkto": "0.0.3",
+    "cordova-linkto": "^1.0.0",
     "cpy": "^4.0.1",
     "exec-then": "^1.3.1",
+    "execa": "^0.4.0",
     "lodash": "^4.13.1",
+    "mkdirp": "^0.5.1",
     "q": "^1.4.1",
-    "semver": "^5.2.0",
-    "mkdirp": "^0.5.1"
+    "semver": "^5.2.0"
   },
   "devDependencies": {
     "ava": "^0.15.2",
@@ -34,8 +35,9 @@
     "xo": "^0.16.0"
   },
   "scripts": {
-    "test": "xo && rm -rf test/tmp && mkdir -p test/tmp && ava --serial ./test/test-gadget.js ./test/test-conf.js ./test/test-platform.js ./test-build.js ./test/test-package.js",
-    "test:run": "ava --serial ./test/test-conf.js ./test/test-platform.js ./test/test-run.js"
+    "test": "xo && rm -rf test/tmp && mkdir -p test/tmp && ava --serial ./test/test-platform.js ./test/test-build.js",
+    "test1": "xo && rm -rf test/tmp && mkdir -p test/tmp && ava --serial ./test/test-gadget.js ./test/test-conf.js ./test/test-platform.js ./test-build.js ./test/test-package.js",
+    "test:run": "xo && rm -rf test/tmp && mkdir -p test/tmp && PLATFORM=chrome ava --serial ./test/test-conf.js ./test/test-platform.js ./test/test-run.js"
   },
   "xo": {
     "space": 2,

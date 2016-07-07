@@ -5,7 +5,7 @@ const fs = require('fs');
 const q = require('q');
 const _ = require('lodash');
 const exec = require('exec-then');
-const linkto = require('cordova-linkto');
+const cordovaLinkTo = require('cordova-linkto');
 const archiver = require('archiver');
 const mkdirp = require('mkdirp');
 const cpy = require('cpy');
@@ -20,37 +20,40 @@ function setOptions(opt) {
   execOptions = _.merge(execOptions, opt);
 }
 
-function getVersion() {
-  return execa('cca', ['--v']).then(res => {
-    const ret = {
-      version: $.getValidSemVer(res.stdout)
-    };
+function execCommand(args, validator) {
+  return execa('cca', args).then(res => {
+    const ret = validator(res);
 
-    if (!ret.version) {
-      throw new Error('cca is not ready');
+    if (ret instanceof Error) {
+      throw ret;
     }
 
     return ret;
   });
 }
 
+function getVersion() {
+  return execCommand(['--v'], res => {
+    const r = $.getValidSemVer(res.stdout);
+
+    return r ? {version: r} : new Error('cca is not ready');
+  });
+}
+
 function checkenv() {
-  return execa('cca', ['checkenv']).then(res => {
-    let re = null;
+  return execCommand(['checkenv'], res => {
     const rx = /(Android|iOS)(.*?)*/gi;
-    const ret = {
-      checkenv: true
-    };
+    let r = true;
+    let re = null;
 
     while ((re = rx.exec(res.stderr)) !== null) {
       if (!$.includes(re[0], 'properly')) {
-        ret.checkenv = false;
-        ret.err = new Error('Platforms are not properly');
+        r = false;
         break;
       }
     }
 
-    return ret;
+    return r ? {checkenv: r} : new Error('Platforms are not properly');
   });
 }
 
@@ -67,242 +70,162 @@ function createProject(opt) {
     throw new Error('It is invalid platform ' + opt.platform);
   }
 
-  var bin = ['cca', 'create', opt.directory, opt.name];
+  const args = ['create', opt.directory, opt.name];
 
   if (opt.platform) {
-    bin.push('--' + opt.platform);
+    args.push('--' + opt.platform);
   }
 
   if (opt.copyFrom) {
-    bin.push('--copy-from=' + opt.copyFrom);
+    args.push('--copy-from=' + opt.copyFrom);
   }
 
   if (opt.linkTo) {
-    bin.push('--link-to=' + opt.linkTo);
+    args.push('--link-to=' + opt.linkTo);
   }
 
-  return exec(bin, execOptions, function (std) {
-    var ret = {
-      created: true
-    };
-    var errs = [
+  return execCommand(args, res => {
+    const errs = [
       'Path already exists',
       'App id contains a reserved word'
     ];
+    const r = errs.every(e => $.notIncludes(res.stderr, e));
 
-    _.forEach(errs, function (e) {
-      if ($.includes(std.stderr, e)) {
-        ret.created = false;
-        ret.err = new Error('Failed to create a new Project, Reason: ' + std.stderr);
-        return false;
-      }
-    });
-
-    return ret;
+    return r ? {created: r} : new Error(`Failed to create a new Project, Reason: ${res.stderr}`);
   });
 }
 
-function doPlatform(subcmd, opt, platform, proc) {
-  if (typeof platform === 'function') {
-    proc = platform;
-    platform = '';
-  } else if (!$.isSupportedPlatform(platform)) {
-    throw new Error(platform + ' is not supported platform');
+function addPlatform(opts) {
+  if (!$.isSupportedPlatform(opts.platform)) {
+    throw new Error(opts.platform + ' is not supported platform');
   }
 
-  opt = opt ? _.merge(execOptions, opt) : {};
+  return execCommand(['platform', 'add', opts.platform], res => {
+    const r = $.notIncludes(res.stderr, 'is not a Cordova-based project');
 
-  return exec(['cca', 'platform', subcmd, platform], opt, function (std) {
-    return proc(std);
+    return r ? {added: r} : new Error('Failed to add a new Platform');
   });
 }
 
-function addPlatform(platform, opts) {
-  return doPlatform('add', opts, platform, function (std) {
-    var ret = {
-      added: true
-    };
+function removePlatform(opts) {
+  if (!$.isSupportedPlatform(opts.platform)) {
+    throw new Error(opts.platform + ' is not supported platform');
+  }
 
-    if ($.includes(std.stderr, 'is not a Cordova-based project')) {
-      ret.added = false;
-      ret.err = new Error('Failed to add a new Platform');
-    }
+  return execCommand(['platform', 'rm', opts.platform], res => {
+    const r = res.stderr === null;
 
-    return ret;
+    return r ? {removed: r} : new Error('Failed to remove the Platform');
   });
 }
 
-function removePlatform(platform, opts) {
-  return doPlatform('rm', opts, platform, function (std) {
-    var ret = {
-      removed: true
-    };
+function getPlatform() {
+  return execCommand(['platform', 'ls'], res => {
+    const re = /(Installed platforms:\W)(.*)/gi.exec(res.stdout);
 
-    if (std.stderr) {
-      ret.added = false;
-      ret.err = new Error('Failed to remove the Platform');
-    }
-
-    return ret;
+    return re && re[2] ? {platforms: re[2].split(', ')} : new Error('Failed to remove the Platform');
   });
 }
 
-function getPlatform(opts) {
-  return doPlatform('ls', opts, function (std) {
-    var ret = {};
+function updatePlatform(opts) {
+  if (!$.isSupportedPlatform(opts.platform)) {
+    throw new Error(opts.platform + ' is not supported platform');
+  }
 
-    var res = /(Installed platforms:\W)(.*)/gi.exec(std.stdout);
-    if (res && res[2]) {
-      ret.platforms = res[2].split(', ');
-    }
+  return execCommand(['platform', 'update', opts.platform], res => {
+    const re = /(Android project updated with cordova-android\W)(.*)/gi.exec(res.stdout);
 
-    return ret;
-  });
-}
-
-function updatePlatform(platform, opts) {
-  return doPlatform('update', opts, platform, function (std) {
-    var ret = {};
-    var res = /(Android project updated with cordova-android\W)(.*)/gi.exec(std.stdout);
-    if (res && res[2]) {
-      ret.newVersion = res[2];
-    }
-
-    return ret;
+    return re && re[2] ? {newVersion: re[2]} : new Error('Failed to update the Platform');
   });
 }
 
 function getPlugins() {
-  return exec(['cca', 'plugin', 'ls'], execOptions, function (std) {
-    var ret = {};
+  return execCommand(['plugin', 'ls'], res => {
+    let r = null;
 
-    if (!std.stderr) {
-      var res = std.stdout.trim().split('\n');
+    if (!res.stderr) {
+      const plugins = res.stdout.trim().split('\n');
+      r = {
+        plugins: []
+      };
 
-      // Should be more than 1
-      if (res.length > 1) {
-        ret.plugins = [];
-      }
-
-      for (var i = 1; i < res.length; ++i) {
-        var p = res[i].split(' ');
-        ret.plugins.push({
+      for (let i = 1; i < plugins.length; ++i) {
+        const p = plugins[i].split(' ');
+        r.plugins.push({
           id: p[0],
           version: p[1],
-          name: /("(.*?)"$)/i.exec(res[i])[0]
+          name: /("(.*?)"$)/i.exec(plugins[i])[0]
         });
       }
     }
 
-    return ret;
+    return r;
   });
 }
 
-function build(platforms, opt) {
-  var bin = ['cca', 'build'];
+function build(opts) {
+  let args = ['build'];
+  const platforms = [];
 
-  if (platforms) {
-    if (!_.isArray(platforms)) {
-      platforms = new Array(platforms);
-    }
+  platforms.concat(opts.platform);
 
+  if (platforms.length > 0) {
     if (!$.isSupportedPlatform(platforms)) {
       throw new Error('Invalid platforms');
     }
 
-    bin = bin.concat(platforms);
+    args = args.concat(platforms);
   }
 
-  opt = opt ? _.merge(execOptions, opt) : {};
-
-  return exec(bin, opt, function (std) {
-    var ret = {
-      build: true
-    };
-
-    var buildMessage = {
+  return execCommand(args, res => {
+    const msgs = {
       android: 'BUILD SUCCESSFUL',
       ios: 'BUILD SUCCEEDED'
     };
+    const r = platforms.every(p => $.includes(res.stdout, msgs[p]));
 
-    _.forEach(platforms, function (p) {
-      if (buildMessage[p]) {
-        if (!$.includes(std.stdout, buildMessage[p])) {
-          ret.build = false;
-          return false;
-        }
-      }
-    });
-
-    return ret;
+    return r ? {build: r} : new Error('Build has failed');
   });
 }
 
-function run(opt) {
-  opt = _.merge(execOptions, opt);
-
-  if (!$.isSupportedPlatform(opt.platform)) {
+function run(opts) {
+  if (!$.isSupportedPlatform(opts.platform)) {
     throw new Error('Invalid platforms');
   }
 
-  var bin = ['cca'];
+  const args = [];
 
-  if (opt.emulate) {
-    bin.push('emulate');
+  if (opts.emulate) {
+    args.push('emulate');
   } else {
-    bin.push('run');
+    args.push('run');
   }
 
-  bin.push(opt.platform);
+  args.push(opts.platform);
 
-  if (opt.release) {
-    bin.push('--release');
+  if (opts.release) {
+    args.push('--release');
   } else {
-    bin.push('--debug');
+    args.push('--debug');
   }
 
-  var deferred = q.defer();
-  var runBin = function () {
-    exec(bin, opt, function (std) {
-      var ret = {
-        running: true
-      };
+  const linkto = opts.linkto ? cordovaLinkTo : function () {
+    return Promise.resolve();
+  };
 
-      var runMessage = {
+  return linkto(opts.linkto, opts.cwd || process.cwd()).then(() => {
+    return execCommand(args, res => {
+      const msgs = {
         android: [
           'BUILD SUCCESSFUL',
           'LAUNCH SUCCESS'
         ]
       };
+      const r = msgs[opts.platform] ? msgs[opts.platform].every(m => $.includes(res.stdout, m)) : true;
 
-      _.forEach(runMessage[opt.platform], function (m) {
-        if (!$.includes(std.stdout, m)) {
-          ret.running = false;
-          return ret.running;
-        }
-      });
-
-      return ret;
-    }).then(function (res) {
-      deferred.resolve(res);
-    }, function (err) {
-      deferred.reject(err);
+      return r ? {running: r} : new Error('Build has been failed');
     });
-  };
-
-  if (opt.linkto) {
-    linkto(opt.linkto, opt.cwd || process.cwd(), function (err) {
-      if (err) {
-        return deferred.reject();
-      }
-
-      runBin();
-    });
-  } else {
-    runBin();
-  }
-
-  return deferred.promise;
+  });
 }
 
 function push(opt) {
@@ -345,7 +268,7 @@ function push(opt) {
   };
 
   if (opt.linkto) {
-    linkto(opt.linkto, opt.cwd || process.cwd(), function (err) {
+    cordovaLinkTo(opt.linkto, opt.cwd || process.cwd(), function (err) {
       if (err) {
         return deferred.reject();
       }

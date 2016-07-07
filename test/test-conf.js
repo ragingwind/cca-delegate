@@ -11,7 +11,7 @@ test('should return its version', t => {
   return ccad.version().then(function (res) {
     t.truthy(res.version, 'Probably, cca has not been installed');
   }).catch(err => {
-    t.fail(err.toString());
+    t.fail(err.stack);
   });
 });
 
@@ -19,6 +19,6 @@ test('should be prepared', t => {
   return ccad.checkenv().then(function (res) {
     t.truthy(res.checkenv, 'You need to set up environments for cca');
   }).catch(err => {
-    t.fail(err.toString());
+    t.fail(err.stack);
   });
 });

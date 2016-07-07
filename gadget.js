@@ -4,8 +4,11 @@ var _ = require('lodash');
 var semver = require('semver');
 
 function includes(content, str) {
-  return str instanceof RegExp ? str.test(content) :
-    _.includes(content, str);
+  return str instanceof RegExp ? str.test(content) : _.includes(content, str);
+}
+
+function notIncludes(content, str) {
+  return Boolean(!(str instanceof RegExp ? str.test(content) : _.includes(content, str)));
 }
 
 function isPackageName(name) {
@@ -31,6 +34,7 @@ function getValidSemVer(str) {
 
 module.exports = {
   includes: includes,
+  notIncludes: notIncludes,
   isPackageName: isPackageName,
   isSupportedPlatform: isSupportedPlatform,
   getValidSemVer: getValidSemVer
