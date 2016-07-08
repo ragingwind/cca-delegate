@@ -3,10 +3,6 @@
 import test from 'ava';
 import ccad from '../';
 
-test.beforeEach(() => {
-  process.chdir(process.cwd());
-});
-
 test('should return its version', t => {
   return ccad.version().then(function (res) {
     t.truthy(res.version, 'Probably, cca has not been installed');
