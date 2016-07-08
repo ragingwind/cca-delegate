@@ -2,9 +2,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const q = require('q');
 const _ = require('lodash');
-const exec = require('exec-then');
 const cordovaLinkTo = require('cordova-linkto');
 const archiver = require('archiver');
 const mkdirp = require('mkdirp');
@@ -233,7 +231,6 @@ function packageup(dest, opts) {
     throw new Error('dest path is invalid');
   }
 
-  opts = _.merge(execOptions, opts);
   dest = path.resolve(process.cwd(), dest);
   opts.cwd = path.resolve(process.cwd(), opts.cwd);
 
@@ -242,39 +239,29 @@ function packageup(dest, opts) {
   mkdirp(path.join(dest, 'chrome'));
   mkdirp(path.join(dest, 'android'));
 
-  var chromeAppName = 'chromeapp' + (opts.version ? '-' + opts.version : '') + '.zip';
-  var deferred = q.defer();
+  const chromeAppName = `chromeapp${opts.version ? '-' + opts.version : ''}.zip`;
 
-  function zipChromeApp(cb) {
-    var archive = archiver('zip');
-    var zipfile = fs.createWriteStream(path.join(dest, 'chrome', chromeAppName));
+  return new Promise((resolve, reject) => {
+    const archive = archiver('zip');
+    const zipfile = fs.createWriteStream(path.join(dest, 'chrome', chromeAppName));
 
     // zip has been created then resolve a promise
-    zipfile.on('close', cb);
+    zipfile.on('close', () => {
+      cpy(['*.apk'], path.join(dest, 'android'), {
+        cwd: path.join(opts.cwd, 'platforms/android/build/outputs/apk/')
+      }).then(resolve);
+    });
 
     // create a zip for chrome apps with files under www
     archive.pipe(zipfile);
-    archive.on('error', cb);
+    archive.on('error', reject);
     archive.bulk([{
       expand: true,
       cwd: path.join(opts.cwd, 'www'),
       src: ['**']
     }]);
     archive.finalize();
-  }
-
-  // excute package function chains
-  zipChromeApp(function () {
-    cpy(['*.apk'], path.join(dest, 'android'), {
-      cwd: path.join(opts.cwd, 'platforms/android/build/outputs/apk/')
-    }).then(() => {
-      deferred.resolve();
-    }).catch(err => {
-      deferred.reject(err);
-    });
   });
-
-  return deferred.promise;
 }
 
 module.exports = {
@@ -289,6 +276,5 @@ module.exports = {
   getPlugins: getPlugins,
   build: build,
   run: run,
-  push: push,
   packageup: packageup
 };

@@ -35,8 +35,7 @@
     "xo": "^0.16.0"
   },
   "scripts": {
-    "test": "xo && rm -rf test/tmp && mkdir -p test/tmp && ava --serial ./test/test-platform.js ./test/test-build.js",
-    "test1": "xo && rm -rf test/tmp && mkdir -p test/tmp && ava --serial ./test/test-gadget.js ./test/test-conf.js ./test/test-platform.js ./test-build.js ./test/test-package.js",
+    "test": "xo && rm -rf test/tmp && mkdir -p test/tmp && ava --serial ./test/test-gadget.js ./test/test-conf.js ./test/test-platform.js ./test/test-build.js ./test/test-package.js",
     "test:run": "xo && rm -rf test/tmp && mkdir -p test/tmp && PLATFORM=chrome ava --serial ./test/test-conf.js ./test/test-platform.js ./test/test-run.js"
   },
   "xo": {

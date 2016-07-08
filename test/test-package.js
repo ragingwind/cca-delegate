@@ -1,25 +1,18 @@
 'use strict';
 
-import path from 'path';
 import test from 'ava';
 import globby from 'globby';
 import ccad from '../';
-
-const tmp = path.join(__dirname, 'tmp');
-
-test.beforeEach.serial(() => {
-  ccad.options({
-    verbose: true
-  });
-});
+import envs from './envs';
 
 test.serial('should make a zip and copy apks', t => {
-  return ccad.packageup(path.join(tmp, 'package'), {
-    cwd: path.join(tmp, './myApp')
+  return ccad.packageup(envs.packd(), {
+    cwd: envs.appd()
   }).then(() => {
-    var files = globby.sync(['**/*.zip', '**/*.apk'], {
-      cwd: path.join(tmp, 'package')
+    const files = globby.sync(['**/*.zip', '**/*.apk'], {
+      cwd: envs.packd()
     });
+
     t.not(files.indexOf('chrome/chromeapp.zip'), -1);
     t.not(files.indexOf('android/android-armv7-debug-unaligned.apk'), -1);
     t.not(files.indexOf('android/android-armv7-debug.apk'), -1);
@@ -31,12 +24,12 @@ test.serial('should make a zip and copy apks', t => {
 });
 
 test.serial('should make a zip with version', t => {
-  return ccad.packageup(path.join(tmp, 'package'), {
+  return ccad.packageup(envs.packd(), {
     version: '1.0.0',
-    cwd: path.join(tmp, './myApp')
+    cwd: envs.appd()
   }).then(() => {
     var files = globby.sync(['**/*.zip', '**/*.apk'], {
-      cwd: path.join(tmp, 'package')
+      cwd: envs.packd()
     });
 
     t.not(files.indexOf('chrome/chromeapp-1.0.0.zip'), -1);
