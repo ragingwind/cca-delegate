@@ -32,7 +32,6 @@ $ npm install --save cca-delegate
 - build: `cca build android`
 - run: `cca run --debug --watch android` or `cca emulate --debug android`
   + linkto: `String`, You can change www link of cordova project that created with --link-to option
-- push: `cca push --target=192.168.0.30`
 - packageup: package up for android and chrome with built the project
 
 ```js
@@ -49,10 +48,6 @@ ccad.create({directory: './', name: 'com.company.myapp'}).then(res => {
 ccad.run({platform: 'chrome', cwd:'./platform'}).then(() => {
   // after job
 });
-
-ccad.push({target: '192.168.0.30'}).then(() => {
-  // after job
-})
 ```
 
 ## Test
