@@ -228,59 +228,6 @@ function run(opts) {
   });
 }
 
-function push(opt) {
-  opt = _.merge(execOptions, opt);
-  // %WARN% using usb, which has a lot of issue out of box
-  // So it doesn't supports until now
-  if (!opt.target) {
-    throw new Error('does not supports push via usb now');
-  }
-
-  var bin = ['cca', 'push'];
-
-  if (opt.target && opt.port) {
-    opt.target += ':' + opt.port;
-  }
-
-  if (opt.target) {
-    bin.push('--target=' + opt.target);
-  }
-
-  // watch mode makes child process running like daemon
-  // that mean is child process will not return back immediately
-  // so that, we can't get stdio result until child process
-  // has been running
-  if (opt.watch) {
-    bin.push('--watch');
-  }
-
-  var deferred = q.defer();
-  var pushBin = function () {
-    exec(bin, opt, function (std) {
-      return {
-        pushed: !std.stderr || std.stderr.length === 0
-      };
-    }).then(function (res) {
-      deferred.resolve(res);
-    }, function (res) {
-      deferred.reject(res);
-    });
-  };
-
-  if (opt.linkto) {
-    cordovaLinkTo(opt.linkto, opt.cwd || process.cwd(), function (err) {
-      if (err) {
-        return deferred.reject();
-      }
-      pushBin();
-    });
-  } else {
-    pushBin();
-  }
-
-  return deferred.promise;
-}
-
 function packageup(dest, opts) {
   if (!dest) {
     throw new Error('dest path is invalid');
