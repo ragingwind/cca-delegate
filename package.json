@@ -1,6 +1,6 @@
 {
   "name": "cca-delegate",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "Chrome Mobile Apps command delegate for using in programmatically on gulp/Grunt plug-ins",
   "author": {
     "name": "ragingwind",
